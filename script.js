@@ -33,22 +33,143 @@ let queryForcedToShow = true;
 let ctrlKeyIsPressed = false;
 let altKeyIsPressed = false;
 
+$(document).ready(function () {
+    surface = document.getElementById("surface");
+    query = document.getElementById("query");
+    $(".item").click(function (e) {
+        if (e.which === mouseButton.left) {
+            const item = $(this);
+            moveToItem(item);
+        }
+    });
+    $(".item").disableSelection();
+    $(window).keyup(function (e) {
+        if (e.which === keys.ctrl)
+            ctrlKeyIsPressed = false;
+        if (e.which === keys.alt)
+            altKeyIsPressed = false;
+    });
+
+    window.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        if (e.deltaY < 0) {
+            moveToItem(getNextUpItem(currentItem));
+        } else {
+            moveToItem(getNextDownItem(currentItem));
+        }
+        return false;
+    }, {
+        passive: false
+    });
+
+    $(window).scroll(function () {
+        if (ignoreScrollEvent) return;
+
+        let element = document.elementFromPoint(document.body.clientWidth / 2, document.body.clientHeight / 2);
+        if ($(element).is(".item")) {
+            const item = $(element);
+            moveToItem(item, true);
+        }
+    });
+
+    $(window).keydown(function (e) {
+        let parent;
+        let item;
+        if (e.which === keys.ctrl) ctrlKeyIsPressed = true;
+        if (e.which === keys.alt) altKeyIsPressed = true;
+
+        if (e.which === keys.up) {
+            item = (ctrlKeyIsPressed || altKeyIsPressed) ? getNextUpItem(currentItem) : getNextUpItemOnThisOrParentLevel(currentItem);
+            moveToItem(item);
+            return false;
+        }
+        if (e.which === keys.down) {
+            item = (ctrlKeyIsPressed || altKeyIsPressed) ? getNextDownItem(currentItem) : getNextDownItem(currentItem,  true);
+            moveToItem(item);
+            return false;
+        }
+        if (e.which === keys.left) {
+            parent = currentItem.closest("li").parent().closest("li");
+            item = parent.find("> .item");
+            moveToItem(item);
+            return false;
+        }
+        if (e.which === keys.right) {
+            parent = currentItem.closest("li");
+            item = parent.find("> ul > li:first-child > .item");
+            moveToItem(item);
+            return false;
+        }
+        if ((ctrlKeyIsPressed || altKeyIsPressed) && e.which === keys.q) {
+            if (queryForcedToShow)
+                hideQuery();
+            else
+                showQuery();
+            queryForcedToShow = !queryForcedToShow;
+            return false;
+        }
+    });
+
+    $("body").mousemove(function (e) {
+        if (e.clientY < 90) {
+            if (!querySpaceEntered) {
+                if (!queryForcedToShow) showQuery();
+                querySpaceEntered = true;
+            }
+        } else {
+            if (querySpaceEntered) {
+                if (!queryForcedToShow) hideQuery();
+                querySpaceEntered = false;
+            }
+        }
+    });
+
+    $(window).resize(function () {
+        refresh();
+    });
+
+    moveToItem($(getSurfaceFirstItem()));
+    refresh();
+});
+
 jQuery.fn.extend({
     disableSelection: function () {
-        this.each(() => {
-            this.onselectstart = () => false;
-            this.unselectable = "on";
-            jQuery(this).css('-moz-user-select', 'none');
-        });
+        for (var i = 0; i < this.length; i++) {
+            let item = this[i];
+            item.onselectstart = () => false;
+            item.unselectable = "on";
+            item.style.userSelect = 'none';
+        }
     },
     enableSelection: function () {
-        this.each(() => {
-            this.onselectstart = () => {};
-            this.unselectable = "off";
-            jQuery(this).css('-moz-user-select', 'auto');
-        });
+        for (var i = 0; i < this.length; i++) {
+            let item = this[i];
+            item.onselectstart = () => { };
+            item.unselectable = "off";
+            item.style.userSelect = 'auto';
+        }
     }
 });
+
+function getLastItem(element) {
+    let list = element.querySelector("ul");
+    while (list) {
+        let items = list.querySelectorAll("li");
+        if (items.length > 0) {
+            element = items[items.length - 1];
+            list = element.querySelector("ul");
+        }
+    }
+    return element.querySelector(".item");
+}
+
+function getSurfaceFirstItem() {
+    return surface.querySelector("ul > li:first-child > .item");
+}
+
+function getSurfaceLastItem() {
+    return getLastItem(surface);
+}
 
 function getNextUpItemOnThisOrParentLevel(element) {
     let parent = element.closest("li");
@@ -67,27 +188,14 @@ function getNextUpItem(element) {
     let parent = element.closest("li");
     let prev = parent.prev();
     if (prev.length) {
-        let list = prev;
-        list = list.find("> ul");
-        while (list.length) {
-            let items = list.find("> li");
-            if (items.length > 0) {
-                let lastItem = $(items[items.length - 1]);
-                let innerList = lastItem.find("> ul");
-                if (innerList.length)
-                    list = innerList;
-                else
-                    return lastItem.find("> .item");
-            }
-        }
-        return prev.find("> .item");
+        return $(getLastItem(prev[0]));
     }
     if (parent.is(":first-child")) {
         return parent.parent().closest("li").find("> .item");
     }
 }
 
-function getNextDownItem(element, thisLevel=false) {
+function getNextDownItem(element, thisLevel = false) {
     const item = element.closest("li");
 
     if (!thisLevel) {
@@ -107,105 +215,7 @@ function getNextDownItem(element, thisLevel=false) {
     return parentItem.next().find("> .item");
 }
 
-$(document).ready(function () {
-    surface = $("#surface")[0];
-    query = $("#query")[0];
-    $(".item").click(function (e) {
-        if (e.which === mouseButton.left) {
-            const item = $(this);
-            MoveToItem(item);
-        }
-    });
-    $(".item").disableSelection();
-    $(window).keyup(function (e) {
-        if (e.which === keys.ctrl)
-            ctrlKeyIsPressed = false;
-        if (e.which === keys.alt)
-            altKeyIsPressed = false;
-    });
-
-    window.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        if (e.deltaY < 0) {
-            MoveToItem(getNextUpItem(currentItem));
-        } else {
-            MoveToItem(getNextDownItem(currentItem));
-        }
-        return false;
-    }, {
-        passive: false
-    });
-
-    $(window).scroll(function () {
-        if (ignoreScrollEvent) return;
-
-        let element = document.elementFromPoint(document.body.clientWidth / 2, document.body.clientHeight / 2);
-        if ($(element).is(".item")) {
-            const item = $(element);
-            MoveToItem(item, true);
-        }
-    });
-
-    $(window).keydown(function (e) {
-        let parent;
-        let item;
-        if (e.which === keys.ctrl) ctrlKeyIsPressed = true;
-        if (e.which === keys.alt) altKeyIsPressed = true;
-
-        if (e.which === keys.up) {
-            item = (ctrlKeyIsPressed || altKeyIsPressed) ? getNextUpItem(currentItem) : getNextUpItemOnThisOrParentLevel(currentItem);
-            MoveToItem(item);
-            return false;
-        }
-        if (e.which === keys.down) {
-            item = (ctrlKeyIsPressed || altKeyIsPressed) ? getNextDownItem(currentItem) : getNextDownItem(currentItem,  true);
-            MoveToItem(item);
-            return false;
-        }
-        if (e.which === keys.left) {
-            parent = currentItem.closest("li").parent().closest("li");
-            item = parent.find("> .item");
-            MoveToItem(item);
-            return false;
-        }
-        if (e.which === keys.right) {
-            parent = currentItem.closest("li");
-            item = parent.find("> ul > li:first-child > .item");
-            MoveToItem(item);
-            return false;
-        }
-        if ((ctrlKeyIsPressed || altKeyIsPressed) && e.which === keys.q) {
-            if (queryForcedToShow)
-                HideQuery();
-            else
-                ShowQuery();
-            queryForcedToShow = !queryForcedToShow;
-            return false;
-        }
-    });
-
-    $("body").mousemove(function (e) {
-        if (e.clientY < 90) {
-            if (!querySpaceEntered) {
-                if (!queryForcedToShow) ShowQuery();
-                querySpaceEntered = true;
-            }
-        } else {
-            if (querySpaceEntered) {
-                if (!queryForcedToShow) HideQuery();
-                querySpaceEntered = false;
-            }
-        }
-    });
-    MoveToItem(GetFirstItem());
-    Refresh();
-});
-
-$(window).resize(function () {
-    Refresh();
-});
-
-function ShowQuery() {
+function showQuery() {
     query.style.top = "20px";
 	/*
 	setInterval(function () // Иначе страница прыгает
@@ -214,7 +224,7 @@ function ShowQuery() {
 	}, 10);*/
 }
 
-function HideQuery() {
+function hideQuery() {
     query.style.top = (2 - query.offsetHeight) + "px";
 	/*
 	setInterval(function () // Иначе страница прыгает
@@ -223,11 +233,11 @@ function HideQuery() {
 	}, 10); */
 }
 
-function Refresh() {
-    const firstItem = GetFirstItem();
-    const lastItem = GetLastItem();
-    $(surface).css('padding-bottom', ((document.body.clientHeight - firstItem[0].offsetHeight) / 2) + "px");
-    $(surface).css('padding-top', ((document.body.clientHeight - lastItem[0].offsetHeight) / 2) + "px");
+function refresh() {
+    const firstItem = getSurfaceFirstItem();
+    const lastItem = getSurfaceLastItem();
+    $(surface).css('padding-bottom', ((document.body.clientHeight - firstItem.offsetHeight) / 2) + "px");
+    $(surface).css('padding-top', ((document.body.clientHeight - lastItem.offsetHeight) / 2) + "px");
     query.style.left = ((document.body.clientWidth - query.offsetWidth) / 2) + "px";
     if (firstTimeQueryPositionRefresh) {
         setTimeout(() => {
@@ -236,40 +246,24 @@ function Refresh() {
             firstTimeQueryPositionRefresh = false;
         }, 10);
     }
-    RefreshPosition();
+    refreshPosition();
 }
 
-function GetFirstItem() {
-    return $("#surface > ul > li:first-child > .item");
-}
-
-function GetLastItem() {
-    let child = $(surface).find("> ul > li:last-child");
-    do {
-        const childOfChild = child.find("> ul > li:last-child");
-        if (childOfChild.length <= 0) break;
-
-        child = childOfChild;
-    } while (true);
-
-    return child.find("> .item");
-}
-
-function MoveToItem(item, fromScroll) {
+function moveToItem(item, fromScroll) {
     if (item != null && item[0] != null && (currentItem == null || currentItem[0] !== item[0])) {
         if (currentItem != null) {
             currentItem.removeClass("focused");
             currentItem.disableSelection();
         }
-        SetPositionOffset(item[0]);
-        RefreshPosition(fromScroll);
+        setPositionOffset(item[0]);
+        refreshPosition(fromScroll);
         item.addClass("focused");
         item.enableSelection();
         currentItem = item;
     }
 }
 
-function RefreshPosition(fromScroll) {
+function refreshPosition(fromScroll) {
     const newLeft = ((document.body.clientWidth - offsetWidth) / 2 - offsetLeft) + "px";
     const newScrollTop = (offsetTop - (document.body.clientHeight - offsetHeight) / 2);
     if (firstTimePositionRefresh) {
@@ -305,15 +299,15 @@ function RefreshPosition(fromScroll) {
     }
 }
 
-function SetPositionOffset(obj) {
-    const p = GetPosition(obj, surface);
+function setPositionOffset(obj) {
+    const p = getPosition(obj, surface);
     offsetLeft = p.left;
     offsetTop = p.top;
     offsetWidth = obj.offsetWidth;
     offsetHeight = obj.offsetHeight;
 }
 
-function GetPosition(obj, relativeTo) {
+function getPosition(obj, relativeTo) {
     let left = 0;
     let top = 0;
     if (obj.offsetParent) {
