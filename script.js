@@ -1,14 +1,14 @@
-﻿let surface = null;
-let query = null;
-let currentItem = $();
+﻿let surface = null,
+    query = null,
+    currentItem = $();
 
-let offsetLeft = 0;
-let offsetTop = 0;
-let offsetWidth = 0;
-let offsetHeight = 0;
+let offsetLeft = 0,
+    offsetTop = 0,
+    offsetWidth = 0,
+    offsetHeight = 0;
 
-let currentScrollTop = 0;
-let ignoreScrollEvent = false;
+let currentScrollTop = 0,
+    ignoreScrollEvent = false;
 
 const keys = {
     left: 37,
@@ -26,12 +26,12 @@ const mouseButton = {
     right: 3
 };
 
-let firstTimePositionRefresh = true;
-let firstTimeQueryPositionRefresh = true;
-let querySpaceEntered = false;
-let queryForcedToShow = true;
-let ctrlKeyIsPressed = false;
-let altKeyIsPressed = false;
+let firstTimePositionRefresh = true,
+    firstTimeQueryPositionRefresh = true,
+    querySpaceEntered = false,
+    queryForcedToShow = true,
+    ctrlKeyIsPressed = false,
+    altKeyIsPressed = false;
 
 $(document).ready(function () {
     surface = document.getElementById("surface");
@@ -73,9 +73,9 @@ $(document).ready(function () {
     });
 
     $(window).keydown(function (e) {
-        let parent;
-        let item;
-        let ctrlOrAltIsPressed = (e.which === keys.ctrl) || (e.which === keys.alt);
+        let parent,
+            item,
+            ctrlOrAltIsPressed = (e.which === keys.ctrl) || (e.which === keys.alt);
         if (e.which === keys.up) {
             item = getNextUpItem(currentItem, ctrlOrAltIsPressed);
             moveToItem(item);
@@ -132,7 +132,7 @@ $(document).ready(function () {
 
 jQuery.fn.extend({
     disableSelection: function () {
-        for (var i = 0; i < this.length; i++) {
+        for (let i = 0; i < this.length; i++) {
             let item = this[i];
             item.onselectstart = () => false;
             item.unselectable = "on";
@@ -140,7 +140,7 @@ jQuery.fn.extend({
         }
     },
     enableSelection: function () {
-        for (var i = 0; i < this.length; i++) {
+        for (let i = 0; i < this.length; i++) {
             let item = this[i];
             item.onselectstart = () => { };
             item.unselectable = "off";
@@ -170,12 +170,13 @@ function getSurfaceLastItem() {
 }
 
 function getNextUpItem(element, thisLevel = false) {
-    let parent = element.closest("li");
-    let prev = parent.prev();
+    let parent = element.closest("li"),
+        prev = parent.prev();
 
     if (prev.length) {
         return thisLevel ? prev.find("> .item") : $(getLastItem(prev[0]));
-    } else if (parent.is(":first-child")) {
+    } 
+    if(parent.is(":first-child")) {
         return parent.parent().closest("li").find("> .item");
     }
 }
@@ -219,8 +220,8 @@ function hideQuery() {
 }
 
 function refresh() {
-    const firstItem = getSurfaceFirstItem();
-    const lastItem = getSurfaceLastItem();
+    const firstItem = getSurfaceFirstItem(),
+          lastItem = getSurfaceLastItem();
     $(surface).css('padding-bottom', ((document.body.clientHeight - firstItem.offsetHeight) / 2) + "px");
     $(surface).css('padding-top', ((document.body.clientHeight - lastItem.offsetHeight) / 2) + "px");
     query.style.left = ((document.body.clientWidth - query.offsetWidth) / 2) + "px";
@@ -249,8 +250,8 @@ function moveToItem(item, fromScroll) {
 }
 
 function refreshPosition(fromScroll) {
-    const newLeft = ((document.body.clientWidth - offsetWidth) / 2 - offsetLeft) + "px";
-    const newScrollTop = (offsetTop - (document.body.clientHeight - offsetHeight) / 2);
+    const newLeft = ((document.body.clientWidth - offsetWidth) / 2 - offsetLeft) + "px",
+          newScrollTop = (offsetTop - (document.body.clientHeight - offsetHeight) / 2);
     if (firstTimePositionRefresh) {
         surface.style.left = newLeft;
         if (!fromScroll) {
@@ -293,8 +294,8 @@ function setPositionOffset(obj) {
 }
 
 function getPosition(obj, relativeTo) {
-    let left = 0;
-    let top = 0;
+    let left = 0,
+        top = 0
     if (obj.offsetParent) {
         do {
             left += obj.offsetLeft;
