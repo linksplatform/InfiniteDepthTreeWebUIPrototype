@@ -75,16 +75,14 @@ $(document).ready(function () {
     $(window).keydown(function (e) {
         let parent;
         let item;
-        if (e.which === keys.ctrl) ctrlKeyIsPressed = true;
-        if (e.which === keys.alt) altKeyIsPressed = true;
-
+        let ctrlOrAltIsPressed = (e.which === keys.ctrl) || (e.which === keys.alt);
         if (e.which === keys.up) {
-            item = (ctrlKeyIsPressed || altKeyIsPressed) ? getNextUpItem(currentItem) : getNextUpItemOnThisOrParentLevel(currentItem);
+            item = getNextUpItem(currentItem, ctrlOrAltIsPressed);
             moveToItem(item);
             return false;
         }
         if (e.which === keys.down) {
-            item = (ctrlKeyIsPressed || altKeyIsPressed) ? getNextDownItem(currentItem) : getNextDownItem(currentItem,  true);
+            item = getNextDownItem(currentItem, ctrlOrAltIsPressed);
             moveToItem(item);
             return false;
         }
@@ -100,7 +98,7 @@ $(document).ready(function () {
             moveToItem(item);
             return false;
         }
-        if ((ctrlKeyIsPressed || altKeyIsPressed) && e.which === keys.q) {
+        if (ctrlOrAltIsPressed && e.which === keys.q) {
             if (queryForcedToShow)
                 hideQuery();
             else
@@ -171,26 +169,13 @@ function getSurfaceLastItem() {
     return getLastItem(surface);
 }
 
-function getNextUpItemOnThisOrParentLevel(element) {
+function getNextUpItem(element, thisLevel = false) {
     let parent = element.closest("li");
     let prev = parent.prev();
-    let item;
-    if (prev.length > 0) {
-        item = prev.find("> .item");
-        return item;
-    } else if (parent.is(":first-child")) {
-        item = parent.parent().closest("li").find("> .item");
-        return item;
-    }
-}
 
-function getNextUpItem(element) {
-    let parent = element.closest("li");
-    let prev = parent.prev();
     if (prev.length) {
-        return $(getLastItem(prev[0]));
-    }
-    if (parent.is(":first-child")) {
+        return thisLevel ? prev.find("> .item") : $(getLastItem(prev[0]));
+    } else if (parent.is(":first-child")) {
         return parent.parent().closest("li").find("> .item");
     }
 }
