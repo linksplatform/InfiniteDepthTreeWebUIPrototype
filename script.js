@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
     window.onkeyup = (e) => {
-        if (e.which === keys.ctrl)
+        if (e.keyCode === keys.ctrl)
             ctrlKeyIsPressed = false;
         if (e.which === keys.alt)
             altKeyIsPressed = false;
@@ -89,14 +89,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
         if (e.keyCode === keys.left) {
-            parent = currentItem.closest('li').parent().closest('li');
-            item = parent.find('> .item');
+            parent = currentItem.closest('li').parentElement.closest('li');
+            item = parent.querySelector('.item');
             moveToItem(item);
             return false;
         }
         if (e.keyCode === keys.right) {
             parent = currentItem.closest('li');
-            item = parent.find('> ul > li:first-child > .item');
+            item = parent.querySelector('ul > li:first-child > .item');
             moveToItem(item);
             return false;
         }
@@ -193,25 +193,20 @@ function getNextDownItem(element, thisLevel = false) {
     const parentItem = parentList.closest('li');
     if (!parentItem) return null;
 
-    return parentItem.nextElementSibling.querySelector('.item');
+    let nextDown = parentItem.nextElementSibling
+    if (nextDown) {
+        return parentItem.nextElementSibling.querySelector('.item');
+    }
+
+    return null
 }
 
 function showQuery() {
     query.style.top = '20px';
-    /*
-    setInterval(function () // Иначе страница прыгает
-    {
-        $(query).find('input').focus();
-    }, 10);*/
 }
 
 function hideQuery() {
     query.style.top = (2 - query.offsetHeight) + 'px';
-    /*
-    setInterval(function () // Иначе страница прыгает
-    {
-        $(query).find('input').blur();
-    }, 10); */
 }
 
 function refresh() {
