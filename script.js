@@ -163,33 +163,37 @@ function getSurfaceLastItem() {
     return getLastItem(surface);
 }
 
+function isFirstChild(element) {
+    return element.parentElement.firstChild === element
+}
+
 function getNextUpItem(element, thisLevel = false) {
     let parent = element.closest('li'),
-        prev = parent.prev();
+        prev = parent.previousElementSibling;
 
-    if (prev.length) return thisLevel ? prev.find('> .item') : $(getLastItem(prev[0]));
+    if (prev) return thisLevel ? prev.querySelector('.item') : getLastItem(prev);
 
-    if (parent.is(':first-child')) return parent.parent().closest('li').find('> .item');
+    if (isFirstChild(parent) && parent.parentNode.closest('li')) return parent.parentNode.closest('li').querySelector('.item');
 }
 
 function getNextDownItem(element, thisLevel = false) {
     const item = element.closest('li');
 
     if (!thisLevel) {
-        const rightItem = item.find('> ul > li:first-child > .item');
-        if (rightItem.length) return rightItem;
+        const rightItem = item.querySelector('ul > li:first-child > .item');
+        if (rightItem) return rightItem;
     }
 
-    const next = item.next();
-    if (next.length) return next.find('> .item');
+    const next = item.nextElementSibling;
+    if (next) return next.querySelector('.item');
 
     const parentList = item.closest('ul');
-    if (!parentList.length) return null;
+    if (!parentList) return null;
 
     const parentItem = parentList.closest('li');
-    if (!parentItem.length) return null;
+    if (!parentItem) return null;
 
-    return parentItem.next().find('> .item');
+    return parentItem.nextElementSibling.querySelector('.item');
 }
 
 function showQuery() {
