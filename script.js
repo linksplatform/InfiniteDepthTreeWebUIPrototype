@@ -81,24 +81,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.keyCode === keys.up) {
             item = getNextUpItem(currentItem, ctrlOrAltIsPressed);
             moveToItem(item);
-            return false;
         }
         if (e.keyCode === keys.down) {
             item = getNextDownItem(currentItem, ctrlOrAltIsPressed);
             moveToItem(item);
-            return false;
         }
         if (e.keyCode === keys.left) {
             parent = currentItem.closest('li').parentElement.closest('li');
+            if (!parent) return;
             item = parent.querySelector('.item');
             moveToItem(item);
-            return false;
         }
         if (e.keyCode === keys.right) {
             parent = currentItem.closest('li');
-            item = parent.querySelector('ul > li:first-child > .item');
+            if (!parent) return;
+            item = parent.querySelector('ul').querySelector('li .item');
             moveToItem(item);
-            return false;
         }
         if (ctrlOrAltIsPressed && e.which === keys.q) {
             if (queryForcedToShow) {
@@ -107,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 showQuery();
             }
             queryForcedToShow = !queryForcedToShow;
-            return false;
         }
     });
 
@@ -173,7 +170,7 @@ function getNextUpItem(element, thisLevel = false) {
 
     if (prev) return thisLevel ? prev.querySelector('.item') : getLastItem(prev);
 
-    if (isFirstChild(parent) && parent.parentNode.closest('li')) return parent.parentNode.closest('li').querySelector('.item');
+    if (isFirstChild(parent)) return parent.parentElement.closest('li').querySelector('.item');
 }
 
 function getNextDownItem(element, thisLevel = false) {
@@ -245,7 +242,7 @@ function refreshPosition(fromScroll) {
     if (firstTimePositionRefresh) {
         surface.style.left = newLeft;
         if (!fromScroll) {
-            $(window).scrollTop(newScrollTop);
+            document.documentElement.scrollTop = newScrollTop;
         }
         firstTimePositionRefresh = false;
     } else {
