@@ -167,12 +167,9 @@ function getNextUpItem(element, thisLevel = false) {
     let parent = element.closest('li'),
         prev = parent.prev();
 
-    if (prev.length) {
-        return thisLevel ? prev.find('> .item') : $(getLastItem(prev[0]));
-    }
-    if(parent.is(':first-child')) {
-        return parent.parent().closest('li').find('> .item');
-    }
+    if (prev.length) return thisLevel ? prev.find('> .item') : $(getLastItem(prev[0]));
+
+    if (parent.is(':first-child')) return parent.parent().closest('li').find('> .item');
 }
 
 function getNextDownItem(element, thisLevel = false) {
@@ -290,11 +287,11 @@ function setPositionOffset(obj) {
 function getPosition(obj, relativeTo) {
     let left = 0,
         top = 0
-    if (obj.offsetParent) {
-        do {
-            left += obj.offsetLeft;
-            top += obj.offsetTop;
-        } while (obj === obj.offsetParent && obj !== relativeTo);
-    }
-    return { 'left': left, 'top': top };
+
+    if (!obj.offsetParent) return { 'left': left, 'top': top };
+
+    do {
+        left += obj.offsetLeft;
+        top += obj.offsetTop;
+    } while (obj === obj.offsetParent && obj !== relativeTo);
 }
