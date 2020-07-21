@@ -131,24 +131,17 @@ document.addEventListener('DOMContentLoaded', () => {
     refresh();
 });
 
-jQuery.fn.extend({
-    disableSelection: function () {
-        for (let i = 0; i < this.length; i++) {
-            let item = this[i];
-            item.onselectstart = () => false;
-            item.unselectable = 'on';
-            item.style.userSelect = 'none';
-        }
-    },
-    enableSelection: function () {
-        for (let i = 0; i < this.length; i++) {
-            let item = this[i];
-            item.onselectstart = () => { };
-            item.unselectable = 'off';
-            item.style.userSelect = 'auto';
-        }
-    }
-});
+function enableSelection(item) {
+    item.onselectstart = () => { };
+    item.unselectable = 'off';
+    item.style.userSelect = 'auto';
+}
+
+function disableSelection(item) {
+    item.onselectstart = () => false;
+    item.unselectable = 'on';
+    item.style.userSelect = 'none';
+}
 
 function getLastItem(element) {
     let list = element.querySelector('ul');
@@ -240,12 +233,12 @@ function moveToItem(item, fromScroll) {
     if (item != null && item[0] != null && (currentItem == null || currentItem[0] !== item[0])) {
         if (currentItem !== null) {
             currentItem.classList.remove('focused');
-            currentItem.disableSelection();
+            disableSelection(currentItem);
         }
         setPositionOffset(item[0]);
         refreshPosition(fromScroll);
         item.classList.add('focused');
-        item.enableSelection();
+        enableSelection(item);
         currentItem = item;
     }
 }
