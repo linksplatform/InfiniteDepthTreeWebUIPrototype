@@ -294,4 +294,5 @@ function getPosition(obj, relativeTo) {
         left += obj.offsetLeft;
         top += obj.offsetTop;
     } while (obj === obj.offsetParent && obj !== relativeTo);
+    return { 'left': left, 'top': top };
 }
