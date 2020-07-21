@@ -227,12 +227,12 @@ function refresh() {
 }
 
 function moveToItem(item, fromScroll) {
-    if (item != null && item[0] != null && (currentItem == null || currentItem[0] !== item[0])) {
+    if (item != null && (currentItem == null || currentItem !== item)) {
         if (currentItem !== null) {
             currentItem.classList.remove('focused');
             disableSelection(currentItem);
         }
-        setPositionOffset(item[0]);
+        setPositionOffset(item);
         refreshPosition(fromScroll);
         item.classList.add('focused');
         enableSelection(item);
