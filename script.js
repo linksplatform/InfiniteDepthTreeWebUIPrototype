@@ -184,25 +184,31 @@ function getNextDownItem(element, thisLevel = false) {
     console.log("Element: ", element)
     console.log("Item: ", item)
 
-    if (!thisLevel) {
+    if (thisLevel) {
+        console.log(1)
         const rightItem = item.querySelector('ul').querySelector('li .item');
         if (rightItem) return rightItem;
     }
 
     const next = item.nextElementSibling;
+    console.log("Next: ", next)
     if (next) return next.querySelector('.item');
 
-    const parentList = item.closest('ul');
+    const parentList = item.querySelector('ul');
+    console.log("parentList: ", parentList)
     if (!parentList) return null;
 
-    const parentItem = parentList.closest('li');
+    const parentItem = parentList.querySelector('li');
+    console.log("parentItem: ", parentItem)
     if (!parentItem) return null;
 
     let nextDown = parentItem.nextElementSibling
+    console.log("nextDown: ", nextDown)
     if (nextDown) {
-        return parentItem.nextElementSibling.querySelector('.item');
+        return parentItem.querySelector('.item');
     }
 
+    console.log("return null")
     return null
 }
 
