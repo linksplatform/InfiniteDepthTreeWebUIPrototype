@@ -172,20 +172,20 @@ function getNextUpItem(element, thisLevel = false) {
     if (prev && !thisLevel) return getLastItem(prev);
 
     if (isFirstChild(parent)) {
-        console.log(parent.parentElement.closest('li > .item'))
-        return element.parentElement.parentElement.parentElement.firstElementChild;
+        let el = element.parentElement.parentElement.parentElement.firstElementChild;
+        if (el.classList.contains('item')) return el;
     }
+
+    return element
 }
 
 function getNextDownItem(element, thisLevel = false) {
     const item = element.closest('li');
     console.log("Element: ", element)
-    console.log("Item: ", element)
-    console.log("Ctrl", thisLevel)
+    console.log("Item: ", item)
 
-    if (thisLevel) {
+    if (!thisLevel) {
         const rightItem = item.querySelector('ul').querySelector('li .item');
-        console.log(rightItem)
         if (rightItem) return rightItem;
     }
 
