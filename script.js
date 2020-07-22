@@ -153,7 +153,7 @@ function getLastItem(element) {
 }
 
 function getSurfaceFirstItem() {
-    return surface.querySelector('ul > li:first-child > .item');
+    return surface.querySelector('ul').querySelector('li .item');
 }
 
 function getSurfaceLastItem() {
@@ -161,23 +161,31 @@ function getSurfaceLastItem() {
 }
 
 function isFirstChild(element) {
-    return element.parentElement.firstChild === element
+    return element.parentElement.firstElementChild === element
 }
 
 function getNextUpItem(element, thisLevel = false) {
     let parent = element.closest('li'),
         prev = parent.previousElementSibling;
 
-    if (prev) return thisLevel ? prev.querySelector('.item') : getLastItem(prev);
+    if (prev && thisLevel) return prev.querySelector('.item');
+    if (prev && !thisLevel) return getLastItem(prev);
 
-    if (isFirstChild(parent)) return parent.parentElement.closest('li').querySelector('.item');
+    if (isFirstChild(parent)) {
+        console.log(parent.parentElement.closest('li > .item'))
+        return element.parentElement.parentElement.parentElement.firstElementChild;
+    }
 }
 
 function getNextDownItem(element, thisLevel = false) {
     const item = element.closest('li');
+    console.log("Element: ", element)
+    console.log("Item: ", element)
+    console.log("Ctrl", thisLevel)
 
-    if (!thisLevel) {
-        const rightItem = item.querySelector('ul > li:first-child > .item');
+    if (thisLevel) {
+        const rightItem = item.querySelector('ul').querySelector('li .item');
+        console.log(rightItem)
         if (rightItem) return rightItem;
     }
 
@@ -223,7 +231,7 @@ function refresh() {
 }
 
 function moveToItem(item, fromScroll) {
-    if (item != null && (currentItem == null || currentItem !== item)) {
+    if (item !== null && (currentItem == null || currentItem !== item)) {
         if (currentItem !== null) {
             currentItem.classList.remove('focused');
             disableSelection(currentItem);
