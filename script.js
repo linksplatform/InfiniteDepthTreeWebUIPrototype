@@ -29,28 +29,21 @@ const mouseButton = {
 let firstTimePositionRefresh = true,
     firstTimeQueryPositionRefresh = true,
     querySpaceEntered = false,
-    queryForcedToShow = true,
-    ctrlKeyIsPressed = false,
-    altKeyIsPressed = false;
+    queryShouldBeShown = true;
 
 document.addEventListener('DOMContentLoaded', () => {
     surface = document.getElementById('surface');
     query = document.getElementById('query');
 
-    let items = document.getElementsByClassName('item')
-    Array.from(items).forEach((i) => {
-        i.addEventListener('selectstart', (e) => e.preventDefault());
-        i.onclick = (e) => {
-            if (e.which === mouseButton.left) moveToItem(i)
+    window.addEventListener('click', (e) => {
+        if (e.which === mouseButton.left && e.target.classList.contains('item')) {
+            moveToItem(e.target);
         }
-    })
+    });
 
-    window.onkeyup = (e) => {
-        if (e.keyCode === keys.ctrl)
-            ctrlKeyIsPressed = false;
-        if (e.which === keys.alt)
-            altKeyIsPressed = false;
-    };
+    window.addEventListener('keydown', (e) => {
+        if (tryHandleKeyDown(e)) e.preventDefault();
+    });
 
     window.addEventListener('wheel', (e) => {
         e.preventDefault();
@@ -60,84 +53,74 @@ document.addEventListener('DOMContentLoaded', () => {
             moveToItem(getNextDownItem(currentItem));
         }
         return false;
-    }, {
-        passive: false
-    });
+    }, { passive: false });
 
     window.addEventListener('scroll', (e) => {
         if (ignoreScrollEvent) return;
-
         let element = document.elementFromPoint(document.body.clientWidth / 2, document.body.clientHeight / 2);
-
         if (element.classList.contains('item')) {
             moveToItem(element, true);
         }
     });
 
-    window.addEventListener('keydown', (e) => {
-        let parent,
-            item,
-            ctrlOrAltIsPressed = (e.which === keys.ctrl) || (e.which === keys.alt);
-        if (e.keyCode === keys.up) {
-            item = getNextUpItem(currentItem, ctrlOrAltIsPressed);
-            moveToItem(item);
-        }
-        if (e.keyCode === keys.down) {
-            item = getNextDownItem(currentItem, ctrlOrAltIsPressed);
-            moveToItem(item);
-        }
-        if (e.keyCode === keys.left) {
-            parent = currentItem.closest('li').parentElement.closest('li');
-            if (!parent) return;
-            item = parent.querySelector('.item');
-            moveToItem(item);
-        }
-        if (e.keyCode === keys.right) {
-            parent = currentItem.closest('li');
-            if (!parent) return;
-            item = parent.querySelector('ul').querySelector('li .item');
-            moveToItem(item);
-        }
-        if (ctrlOrAltIsPressed && e.which === keys.q) {
-            if (queryForcedToShow) {
-                hideQuery();
+    window.addEventListener('mousemove', (e) => {
+        if (!queryShouldBeShown) {
+            if (e.clientY < 90) {
+                if (!querySpaceEntered) {
+                    showQuery();
+                    querySpaceEntered = true;
+                }
             } else {
-                showQuery();
+                if (querySpaceEntered) {
+                    hideQuery();
+                    querySpaceEntered = false;
+                }
             }
-            queryForcedToShow = !queryForcedToShow;
         }
     });
 
-    document.body.onmousemove = (e) => {
-        if (e.clientY < 90) {
-            if (!querySpaceEntered) {
-                if (!queryForcedToShow) showQuery();
-                querySpaceEntered = true;
-            }
-        } else {
-            if (querySpaceEntered) {
-                if (!queryForcedToShow) hideQuery();
-                querySpaceEntered = false;
-            }
-        }
-    };
-
-    window.onresize = () => refresh();
+    window.addEventListener('resize', refresh);
 
     moveToItem(getSurfaceFirstItem());
     refresh();
 });
 
-function enableSelection(item) {
-    item.onselectstart = () => { };
-    item.unselectable = 'off';
-    item.style.userSelect = 'auto';
+function tryHandleKeyDown(e) {
+    const ctrlOrAltIsPressed = e.ctrlKey || e.altKey;
+    if (e.keyCode === keys.up) {
+        moveToItem(getNextUpItem(currentItem, !ctrlOrAltIsPressed));
+        return true;
+    }
+    if (e.keyCode === keys.down) {
+        moveToItem(getNextDownItem(currentItem, !ctrlOrAltIsPressed));
+        return true;
+    }
+    if (e.keyCode === keys.left) {
+        moveToItem(getNextLeftItem(currentItem));
+        return true;
+    }
+    if (e.keyCode === keys.right) {
+        moveToItem(getNextRightItem(currentItem));
+        return true;
+    }
+    if (ctrlOrAltIsPressed && e.which === keys.q) {
+        if (queryShouldBeShown) {
+            hideQuery();
+        } else {
+            showQuery();
+        }
+        queryShouldBeShown = !queryShouldBeShown;
+        return true;
+    }
+    return false;
 }
 
-function disableSelection(item) {
-    item.onselectstart = () => false;
-    item.unselectable = 'on';
-    item.style.userSelect = 'none';
+function getNextLeftItem(element) {
+    return element.closest('li')?.parentElement?.closest('li')?.querySelector('.item');
+}
+
+function getNextRightItem(element) {
+    return element.closest('li')?.querySelector('ul')?.querySelector('li .item');
 }
 
 function getLastItem(element) {
@@ -153,7 +136,7 @@ function getLastItem(element) {
 }
 
 function getSurfaceFirstItem() {
-    return surface.querySelector('ul').querySelector('li .item');
+    return surface.querySelector('ul')?.querySelector('li .item');
 }
 
 function getSurfaceLastItem() {
@@ -161,55 +144,36 @@ function getSurfaceLastItem() {
 }
 
 function isFirstChild(element) {
-    return element.parentElement.firstElementChild === element
+    return element.parentElement.firstElementChild === element;
 }
 
 function getNextUpItem(element, thisLevel = false) {
-    let parent = element.closest('li'),
-        prev = parent.previousElementSibling;
-
-    if (prev && thisLevel) return prev.querySelector('.item');
-    if (prev && !thisLevel) return getLastItem(prev);
-
-    if (isFirstChild(parent)) {
-        let el = element.parentElement.parentElement.parentElement.firstElementChild;
-        if (el.classList.contains('item')) return el;
+    const parent = element.closest('li'), prev = parent.previousElementSibling;
+    if (prev) {
+        if (thisLevel) {
+            return prev.querySelector('.item');
+        } else {
+            return getLastItem(prev);
+        }
     }
-
-    return element
+    if (isFirstChild(parent)) {
+        const nextItem = parent.parentElement?.closest('li')?.querySelector('.item');
+        if (nextItem) return nextItem;
+    }
+    return element;
 }
 
 function getNextDownItem(element, thisLevel = false) {
-    const item = element.closest('li');
-    console.log("Element: ", element)
-    console.log("Item: ", item)
-
-    if (thisLevel) {
-        console.log(1)
-        const rightItem = item.querySelector('ul').querySelector('li .item');
+    const parent = element.closest('li');
+    if (!thisLevel) {
+        const rightItem = parent.querySelector('ul')?.querySelector('li .item');
         if (rightItem) return rightItem;
     }
-
-    const next = item.nextElementSibling;
-    console.log("Next: ", next)
-    if (next) return next.querySelector('.item');
-
-    const parentList = item.querySelector('ul');
-    console.log("parentList: ", parentList)
-    if (!parentList) return null;
-
-    const parentItem = parentList.querySelector('li');
-    console.log("parentItem: ", parentItem)
-    if (!parentItem) return null;
-
-    let nextDown = parentItem.nextElementSibling
-    console.log("nextDown: ", nextDown)
-    if (nextDown) {
-        return parentItem.querySelector('.item');
-    }
-
-    console.log("return null")
-    return null
+    const nextItem = parent.nextElementSibling?.querySelector('.item');
+    if (nextItem) return nextItem;
+    const nextParentItem = parent.parentElement?.closest('li')?.nextElementSibling?.querySelector('.item');
+    if (nextParentItem) return nextParentItem;
+    return null;
 }
 
 function showQuery() {
@@ -221,10 +185,9 @@ function hideQuery() {
 }
 
 function refresh() {
-    const firstItem = getSurfaceFirstItem(),
-        lastItem = getSurfaceLastItem();
-    $(surface).css('padding-bottom', ((document.body.clientHeight - firstItem.offsetHeight) / 2) + 'px');
-    $(surface).css('padding-top', ((document.body.clientHeight - lastItem.offsetHeight) / 2) + 'px');
+    const firstItem = getSurfaceFirstItem(), lastItem = getSurfaceLastItem();
+    surface.style.paddingBottom = ((document.body.clientHeight - firstItem.offsetHeight) / 2) + 'px';
+    surface.style.paddingTop = ((document.body.clientHeight - lastItem.offsetHeight) / 2) + 'px';
     query.style.left = ((document.body.clientWidth - query.offsetWidth) / 2) + 'px';
     if (firstTimeQueryPositionRefresh) {
         setTimeout(() => {
@@ -237,22 +200,20 @@ function refresh() {
 }
 
 function moveToItem(item, fromScroll) {
-    if (item !== null && (currentItem == null || currentItem !== item)) {
+    if (item && (!currentItem || currentItem !== item)) {
         if (currentItem !== null) {
             currentItem.classList.remove('focused');
-            disableSelection(currentItem);
         }
         setPositionOffset(item);
         refreshPosition(fromScroll);
         item.classList.add('focused');
-        enableSelection(item);
         currentItem = item;
     }
 }
 
 function refreshPosition(fromScroll) {
-    const newLeft = ((document.body.clientWidth - offsetWidth) / 2 - offsetLeft) + 'px',
-        newScrollTop = (offsetTop - (document.body.clientHeight - offsetHeight) / 2);
+    const newLeft = ((document.body.clientWidth - offsetWidth) / 2 - offsetLeft) + 'px';
+    const newScrollTop = (offsetTop - (document.body.clientHeight - offsetHeight) / 2);
     if (firstTimePositionRefresh) {
         surface.style.left = newLeft;
         if (!fromScroll) {
@@ -287,22 +248,20 @@ function refreshPosition(fromScroll) {
 }
 
 function setPositionOffset(obj) {
-    const p = getPosition(obj, surface);
-    offsetLeft = p.left;
-    offsetTop = p.top;
+    const position = getPosition(obj, surface);
+    offsetLeft = position.left;
+    offsetTop = position.top;
     offsetWidth = obj.offsetWidth;
     offsetHeight = obj.offsetHeight;
 }
 
 function getPosition(obj, relativeTo) {
-    let left = 0,
-        top = 0
-
-    if (!obj.offsetParent) return { 'left': left, 'top': top };
-
-    do {
-        left += obj.offsetLeft;
-        top += obj.offsetTop;
-    } while (obj === obj.offsetParent && obj !== relativeTo);
+    let left = 0, top = 0;
+    if (obj.offsetParent) {
+        do {
+            left += obj.offsetLeft;
+            top += obj.offsetTop;
+        } while (obj === obj.offsetParent && obj !== relativeTo);
+    }
     return { 'left': left, 'top': top };
 }
