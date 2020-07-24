@@ -13,8 +13,7 @@
         offsetWidth = 0,
         offsetHeight = 0;
 
-    let currentScrollTop = 0,
-        ignoreScrollEvent = false;
+    let ignoreScrollEvent = false;
 
     const keys = {
         left: 37,
@@ -35,10 +34,8 @@
     const scrollAnimationDuration = 500;
 
     let firstTimePositionRefresh = true,
-        firstTimeQueryPositionRefresh = true,
         querySpaceEntered = false,
         queryShouldBeShown = true,
-        animationStopRequested = false,
         animationStopped = true;
 
     document.addEventListener('DOMContentLoaded', () => {
