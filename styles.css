@@ -24,13 +24,10 @@ body {
 	побычным эффектом становится то, что в браузерах перестаёт работать
 	прокрутка по горизонтали (через среднюю кнопку мыши, а также при использовании single|multi touch) */
     display: inline-block;
-    /*
-    transition: all 0.7s ease 0s;
-	*/
 }
 
     #surface.animated {
-        transition: all 0.45s ease-in-out 0s;
+        transition: all 0.5s ease-in-out 0s;
     }
 
 ul {

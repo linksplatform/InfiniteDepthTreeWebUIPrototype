@@ -26,6 +26,8 @@ const mouseButton = {
     right: 3
 };
 
+const scrollAnimationDuration = 500;
+
 let firstTimePositionRefresh = true,
     firstTimeQueryPositionRefresh = true,
     querySpaceEntered = false,
@@ -85,6 +87,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     moveToItem(getSurfaceFirstItem());
     refresh();
+
+    // Should be enabled for the first user interactions
+
+    surface.classList.add('animated');
+    query.classList.add('animated');
 });
 
 function tryHandleKeyDown(e) {
@@ -191,13 +198,6 @@ function refresh() {
     surface.style.paddingBottom = ((document.body.clientHeight - firstItem.offsetHeight) / 2) + 'px';
     surface.style.paddingTop = ((document.body.clientHeight - lastItem.offsetHeight) / 2) + 'px';
     query.style.left = ((document.body.clientWidth - query.offsetWidth) / 2) + 'px';
-    if (firstTimeQueryPositionRefresh) {
-        setTimeout(() => {
-            // Иначе анимация начинает работать сразу
-            query.classList.add('animated');
-            firstTimeQueryPositionRefresh = false;
-        }, 10);
-    }
     refreshPosition();
 }
 
@@ -223,35 +223,10 @@ function refreshPosition(fromScroll) {
         }
         firstTimePositionRefresh = false;
     } else {
-        surface.classList.remove('animated');
-        surface.classList.add('animated');
-        //$(surface).stop(true);
-        if (fromScroll) {
-            surface.style.left = newLeft;
-
-            //$(surface).animate({
-            //    left: newLeft,
-            //    queue: false
-            //}, 600);
-        } else {
-            //$('html').stop(true);
-
+        surface.style.left = newLeft;
+        if (!fromScroll) {
             ignoreScrollEvent = true;
-            surface.style.left = newLeft;
-
-            //document.body.classList.remove('animated');
-            //document.body.classList.add('animated');
-
-            //document.documentElement.classList.remove('animated');
-            //document.documentElement.classList.add('animated');
-
-            //document.documentElement.scrollTop = newScrollTop;
-
-            //document.body.style.setProperty('--scroll', newScrollTop);
-
-            const animationDuration = 450;
-
-            scrollToY(newScrollTop, animationDuration, function () {
+            scrollToY(newScrollTop, scrollAnimationDuration, function () {
                 ignoreScrollEvent = false;
             });
         }
@@ -277,17 +252,9 @@ function getPosition(obj, relativeTo) {
     return { 'left': left, 'top': top };
 }
 
-
-var scrollCosParameter, scrollCount, scrollOldTimestamp, scrollCallback, scrollDuration, scrollElement, scrollTargetY;
+let scrollCosParameter, scrollCount, scrollOldTimestamp, scrollCallback, scrollDuration, scrollElement, scrollTargetY;
 
 function scrollStep(newTimestamp) {
-    //if (animationStopRequested) {
-    //    animationStopped = true;
-    //    animationStopRequested = false;
-    //    if (scrollCallback) setTimeout(scrollCallback, 10);
-    //    return;
-    //} else {
-
     if (scrollOldTimestamp !== null) {
         // if duration is 0 scrollCount will be Infinity
         scrollCount += Math.PI * (newTimestamp - scrollOldTimestamp) / scrollDuration;
@@ -301,14 +268,11 @@ function scrollStep(newTimestamp) {
     }
     scrollOldTimestamp = newTimestamp;
     window.requestAnimationFrame(scrollStep);
-
-    //}
 }
 
 function scrollToY(y, duration = 0, callback, element = document.scrollingElement) {
     // cancel if already on target position
     if (element.scrollTop === y) return;
-
     scrollCosParameter = (element.scrollTop - y) / 2;
     scrollCount = 0;
     scrollOldTimestamp = null;
@@ -316,35 +280,8 @@ function scrollToY(y, duration = 0, callback, element = document.scrollingElemen
     scrollDuration = duration;
     scrollElement = element;
     scrollTargetY = y;
-
     if (animationStopped) {
         animationStopped = false;
         window.requestAnimationFrame(scrollStep);
     }
-    //else {
-    //    //animationStopRequested = true;
-
-    //    scrollCosParameter = (element.scrollTop - y) / 2;
-    //    scrollCount = 0;
-    //    scrollOldTimestamp = null;
-    //    scrollCallback = callback;
-    //    scrollDuration = duration;
-    //    scrollElement = element;
-    //    scrollTargetY = y;
-
-    //    //let interval = setInterval(() => {
-    //    //    if (animationStopped) {
-    //    //        scrollCosParameter = (element.scrollTop - y) / 2;
-    //    //        scrollCount = 0;
-    //    //        scrollOldTimestamp = null;
-    //    //        scrollCallback = callback;
-    //    //        scrollDuration = duration;
-    //    //        scrollElement = element;
-    //    //        scrollTargetY = y;
-
-    //    //        window.requestAnimationFrame(scrollStep);
-    //    //        clearInterval(interval);
-    //    //    }
-    //    //}, 1);
-    //}
 }
