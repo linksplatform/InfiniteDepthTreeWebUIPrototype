@@ -87,6 +87,7 @@ ul {
         }
 
 #query-logo {
+    display: none;
     position: absolute;
     margin-left: -100px;
     margin-top: 3px;
@@ -116,5 +117,9 @@ ul {
 
     #query input {
         width: 500px;
+    }
+
+    #query-logo {
+        display: block;   
     }
 }
