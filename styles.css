@@ -36,7 +36,7 @@ ul {
 }
 
 .item {
-    width: 600px;
+    width: 300px;
     padding: 5px;
     cursor: pointer;
     text-align: justify;
@@ -72,7 +72,7 @@ ul {
         border: 0 none;
         font: 24px Sans-serif, Arial, Helvetica;
         color: #EEE;
-        width: 500px;
+        width: 200px;
         padding: 5px;
         text-align: justify;
         border-radius: 3px;
@@ -107,4 +107,14 @@ ul {
     background-color: rgba(31, 31, 31, 0.6);
     border-radius: 7px;
     /*text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);*/
+}
+
+@media only screen and (min-width: 600px) {
+    .item {
+        width: 600px;
+    }
+
+    #query input {
+        width: 500px;
+    }
 }

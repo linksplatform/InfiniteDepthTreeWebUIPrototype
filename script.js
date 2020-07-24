@@ -83,7 +83,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    window.addEventListener('resize', refresh);
+    window.addEventListener('resize', () => {
+        moveToItem(currentItem);
+        refresh();
+    });
 
     moveToItem(getSurfaceFirstItem());
     refresh();
@@ -202,7 +205,7 @@ function refresh() {
 }
 
 function moveToItem(item, fromScroll) {
-    if (item && (!currentItem || currentItem !== item)) {
+    if (item) {
         if (currentItem != null) {
             currentItem.classList.remove('focused');
         }
