@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.addEventListener('resize', () => {
-        moveToItem(currentItem);
+        moveToItem(currentItem, false, true);
         refresh();
     });
 
@@ -204,8 +204,8 @@ function refresh() {
     refreshPosition();
 }
 
-function moveToItem(item, fromScroll) {
-    if (item) {
+function moveToItem(item, fromScroll, forceMove) {
+    if (item && (forceMove || !currentItem || currentItem !== item)) {
         if (currentItem != null) {
             currentItem.classList.remove('focused');
         }
