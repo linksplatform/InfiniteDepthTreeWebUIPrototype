@@ -1,7 +1,7 @@
 ﻿try {
     window.onerror = function (msg, url, linenumber) {
-        alert(msg + '\nLine number: ' + linenumber)
-        return true
+        alert(msg + '\nLine number: ' + linenumber);
+        return true;
     };
 
     let surface = null,
