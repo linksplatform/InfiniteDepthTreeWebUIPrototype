@@ -145,16 +145,15 @@ try {
                 currentItem.classList.remove('focused');
             }
 
-            setOffset(item);
+            currentItem = item;
             refreshPosition(fromScroll);
             item.classList.add('focused');
-            currentItem = item;
         }
     };
 
     var refreshPosition = function refreshPosition(fromScroll) {
-        var newLeft = (document.body.clientWidth - offsetWidth) / 2 - offsetLeft + 'px';
-        var newScrollTop = offsetTop - (document.body.clientHeight - offsetHeight) / 2;
+        var newLeft = (document.body.clientWidth - currentItem.offsetWidth) / 2 - currentItem.offsetLeft + 'px';
+        var newScrollTop = currentItem.offsetTop - (document.body.clientHeight - currentItem.offsetHeight) / 2;
 
         if (firstTimePositionRefresh) {
             surface.style.left = newLeft;
@@ -174,32 +173,6 @@ try {
                 });
             }
         }
-    };
-
-    var setOffset = function setOffset(obj) {
-        var offset = getOffset(obj, surface);
-        offsetLeft = offset.left;
-        offsetTop = offset.top;
-        offsetWidth = obj.offsetWidth;
-        offsetHeight = obj.offsetHeight;
-    };
-
-    var getOffset = function getOffset(obj, relativeTo) {
-        var left = 0,
-            top = 0;
-
-        if (obj.offsetParent) {
-            do {
-                left += obj.offsetLeft;
-                top += obj.offsetTop;
-                obj = obj.offsetParent;
-            } while (obj && obj !== relativeTo);
-        }
-
-        return {
-            'left': left,
-            'top': top
-        };
     };
 
     var scrollStep = function scrollStep(newTimestamp) {
@@ -249,10 +222,6 @@ try {
     var surface = null,
         query = null,
         currentItem = null;
-    var offsetLeft = 0,
-        offsetTop = 0,
-        offsetWidth = 0,
-        offsetHeight = 0;
     var ignoreScrollEvent = false;
     var keys = {
         left: 37,

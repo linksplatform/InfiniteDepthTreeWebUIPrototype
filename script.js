@@ -8,11 +8,6 @@
         query = null,
         currentItem = null;
 
-    let offsetLeft = 0,
-        offsetTop = 0,
-        offsetWidth = 0,
-        offsetHeight = 0;
-
     let ignoreScrollEvent = false;
 
     const keys = {
@@ -212,16 +207,15 @@
             if (currentItem != null) {
                 currentItem.classList.remove('focused');
             }
-            setOffset(item);
+            currentItem = item;
             refreshPosition(fromScroll);
             item.classList.add('focused');
-            currentItem = item;
         }
     }
 
     function refreshPosition(fromScroll) {
-        const newLeft = ((document.body.clientWidth - offsetWidth) / 2 - offsetLeft) + 'px';
-        const newScrollTop = (offsetTop - (document.body.clientHeight - offsetHeight) / 2);
+        const newLeft = ((document.body.clientWidth - currentItem.offsetWidth) / 2 - currentItem.offsetLeft) + 'px';
+        const newScrollTop = (currentItem.offsetTop - (document.body.clientHeight - currentItem.offsetHeight) / 2);
         if (firstTimePositionRefresh) {
             surface.style.left = newLeft;
             if (!fromScroll) {
@@ -237,26 +231,6 @@
                 });
             }
         }
-    }
-
-    function setOffset(obj) {
-        const offset = getOffset(obj, surface);
-        offsetLeft = offset.left;
-        offsetTop = offset.top;
-        offsetWidth = obj.offsetWidth;
-        offsetHeight = obj.offsetHeight;
-    }
-
-    function getOffset(obj, relativeTo) {
-        let left = 0, top = 0;
-        if (obj.offsetParent) {
-            do {
-                left += obj.offsetLeft;
-                top += obj.offsetTop;
-                obj = obj.offsetParent;
-            } while (obj && obj !== relativeTo);
-        }
-        return { 'left': left, 'top': top };
     }
 
     let scrollCosParameter, scrollCount, scrollOldTimestamp, scrollCallback, scrollDuration, scrollElement, scrollTargetY;
