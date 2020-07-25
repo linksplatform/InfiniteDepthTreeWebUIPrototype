@@ -21,7 +21,7 @@ function extractItems(lines) {
                 let listItem = document.createElement("li");
                 let item = document.createElement("div");
                 item.classList.add("item");
-                item.innerText = lines[i];
+                item.innerText = lines[i].trim();
                 listItem.appendChild(item);
                 let innerLines = [];
                 for (let j = i + 1; j < lines.length; j++) {
