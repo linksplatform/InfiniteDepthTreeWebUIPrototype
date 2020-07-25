@@ -4,11 +4,14 @@
         return true;
     };
 
+    let items = [];
+
     let surface = null,
         query = null,
         currentItem = null;
 
-    let ignoreScrollEvent = false;
+    let lastScrollTop = 0,
+        ignoreScrollEvent = false;
 
     const keys = {
         left: 37,
@@ -59,10 +62,34 @@
 
         window.addEventListener('scroll', (e) => {
             if (ignoreScrollEvent) return;
-            let element = document.elementFromPoint(document.body.clientWidth / 2, document.body.clientHeight / 2);
-            if (element.classList.contains('item')) {
-                moveToItem(element, true);
+            const baseOffset = items[0].offsetTop;
+            const currentScrollTop = document.documentElement.scrollTop;
+            const checkItem = function (item) {
+                const min = item.offsetTop - baseOffset;
+                const max = min + item.offsetHeight;
+                if (currentScrollTop >= min && currentScrollTop <= max) {
+                    return true;
+                }
+                return false;
             }
+            const delta = currentScrollTop - lastScrollTop;
+            const currentIndex = parseInt(currentItem.dataset.index);
+            if (delta > 0) {
+                for (var i = currentIndex; i < items.length; i++) {
+                    if (checkItem(items[i])) {
+                        moveToItem(items[i], true);
+                        break;
+                    }
+                }
+            } else {
+                for (var i = currentIndex; i >= 0; i--) {
+                    if (checkItem(items[i])) {
+                        moveToItem(items[i], true);
+                        break;
+                    }
+                }
+            }
+            lastScrollTop = currentScrollTop;
         });
 
         window.addEventListener('mousemove', (e) => {
@@ -82,18 +109,27 @@
         });
 
         window.addEventListener('resize', () => {
-            moveToItem(currentItem, false, true);
-            refresh();
+            update();
         });
 
-        moveToItem(getSurfaceFirstItem());
-        refresh();
+        update(true);
 
         // Should be enabled for the first user interactions
-
         surface.classList.add('animated');
         query.classList.add('animated');
     });
+
+    function update(reset) {
+        if (reset) {
+            items = document.querySelectorAll('.item');
+            for (let i = 0; i < items.length; i++) {
+                items[i].dataset.index = i;
+            }
+            currentItem = getSurfaceFirstItem();
+        }
+        moveToItem(currentItem, false, true);
+        refresh();
+    }
 
     function tryHandleKeyDown(e) {
         const ctrlOrAltIsPressed = e.ctrlKey || e.altKey;
@@ -146,11 +182,13 @@
     }
 
     function getSurfaceFirstItem() {
-        return surface.querySelector('ul')?.querySelector('li .item');
+        return items[0];
+        //return surface.querySelector('ul')?.querySelector('li .item');
     }
 
     function getSurfaceLastItem() {
-        return getLastItem(surface);
+        return items[items.length - 1];
+        //return getLastItem(surface);
     }
 
     function isFirstChild(element) {
@@ -158,6 +196,14 @@
     }
 
     function getNextUpItem(element, thisLevel = false) {
+        if (!thisLevel) {
+            // Optimization
+            const currentIndex = parseInt(currentItem.dataset.index);
+            if (currentIndex > 0) {
+                return items[currentIndex - 1]; 
+            }
+        }
+        // Universal logic
         const parent = element.closest('li'), prev = parent.previousElementSibling;
         if (prev) {
             if (thisLevel) {
@@ -174,6 +220,14 @@
     }
 
     function getNextDownItem(element, thisLevel = false) {
+        if (!thisLevel) { 
+            // Optimization
+            const currentIndex = parseInt(currentItem.dataset.index);
+            if (currentIndex < (items.length - 1)) {
+                return items[currentIndex + 1];
+            }
+        }
+        // Universal logic
         let parent = element.closest('li');
         const rightItem = parent.querySelector('ul')?.querySelector('li .item');
         if (rightItem && !thisLevel) return rightItem;

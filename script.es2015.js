@@ -1,6 +1,21 @@
 ﻿"use strict";
 
 try {
+    var update = function update(reset) {
+        if (reset) {
+            items = document.querySelectorAll('.item');
+
+            for (var i = 0; i < items.length; i++) {
+                items[i].dataset.index = i;
+            }
+
+            currentItem = getSurfaceFirstItem();
+        }
+
+        moveToItem(currentItem, false, true);
+        refresh();
+    };
+
     var tryHandleKeyDown = function tryHandleKeyDown(e) {
         var ctrlOrAltIsPressed = e.ctrlKey || e.altKey;
 
@@ -54,10 +69,10 @@ try {
         var list = element.querySelector('ul');
 
         while (list) {
-            var items = list.querySelectorAll('li');
+            var _items = list.querySelectorAll('li');
 
-            if (items.length > 0) {
-                element = items[items.length - 1];
+            if (_items.length > 0) {
+                element = _items[_items.length - 1];
                 list = element.querySelector('ul');
             }
         }
@@ -66,13 +81,11 @@ try {
     };
 
     var getSurfaceFirstItem = function getSurfaceFirstItem() {
-        var _surface$querySelecto;
-
-        return (_surface$querySelecto = surface.querySelector('ul')) === null || _surface$querySelecto === void 0 ? void 0 : _surface$querySelecto.querySelector('li .item');
+        return items[0]; //return surface.querySelector('ul')?.querySelector('li .item');
     };
 
     var getSurfaceLastItem = function getSurfaceLastItem() {
-        return getLastItem(surface);
+        return items[items.length - 1]; //return getLastItem(surface);
     };
 
     var isFirstChild = function isFirstChild(element) {
@@ -81,6 +94,17 @@ try {
 
     var getNextUpItem = function getNextUpItem(element) {
         var thisLevel = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+        if (!thisLevel) {
+            // Optimization
+            var currentIndex = parseInt(currentItem.dataset.index);
+
+            if (currentIndex > 0) {
+                return items[currentIndex - 1];
+            }
+        } // Universal logic
+
+
         var parent = element.closest('li'),
             prev = parent.previousElementSibling;
 
@@ -106,6 +130,17 @@ try {
         var _parent$querySelector;
 
         var thisLevel = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+        if (!thisLevel) {
+            // Optimization
+            var currentIndex = parseInt(currentItem.dataset.index);
+
+            if (currentIndex < items.length - 1) {
+                return items[currentIndex + 1];
+            }
+        } // Universal logic
+
+
         var parent = element.closest('li');
         var rightItem = (_parent$querySelector = parent.querySelector('ul')) === null || _parent$querySelector === void 0 ? void 0 : _parent$querySelector.querySelector('li .item');
         if (rightItem && !thisLevel) return rightItem;
@@ -219,10 +254,12 @@ try {
         return true;
     };
 
+    var items = [];
     var surface = null,
         query = null,
         currentItem = null;
-    var ignoreScrollEvent = false;
+    var lastScrollTop = 0,
+        ignoreScrollEvent = false;
     var keys = {
         left: 37,
         up: 38,
@@ -268,11 +305,40 @@ try {
         });
         window.addEventListener('scroll', function (e) {
             if (ignoreScrollEvent) return;
-            var element = document.elementFromPoint(document.body.clientWidth / 2, document.body.clientHeight / 2);
+            var baseOffset = items[0].offsetTop;
+            var currentScrollTop = document.documentElement.scrollTop;
 
-            if (element.classList.contains('item')) {
-                moveToItem(element, true);
+            var checkItem = function checkItem(item) {
+                var min = item.offsetTop - baseOffset;
+                var max = min + item.offsetHeight;
+
+                if (currentScrollTop >= min && currentScrollTop <= max) {
+                    return true;
+                }
+
+                return false;
+            };
+
+            var delta = currentScrollTop - lastScrollTop;
+            var currentIndex = parseInt(currentItem.dataset.index);
+
+            if (delta > 0) {
+                for (var i = currentIndex; i < items.length; i++) {
+                    if (checkItem(items[i])) {
+                        moveToItem(items[i], true);
+                        break;
+                    }
+                }
+            } else {
+                for (var i = currentIndex; i >= 0; i--) {
+                    if (checkItem(items[i])) {
+                        moveToItem(items[i], true);
+                        break;
+                    }
+                }
             }
+
+            lastScrollTop = currentScrollTop;
         });
         window.addEventListener('mousemove', function (e) {
             if (!queryShouldBeShown) {
@@ -290,11 +356,9 @@ try {
             }
         });
         window.addEventListener('resize', function () {
-            moveToItem(currentItem, false, true);
-            refresh();
+            update();
         });
-        moveToItem(getSurfaceFirstItem());
-        refresh(); // Should be enabled for the first user interactions
+        update(true); // Should be enabled for the first user interactions
 
         surface.classList.add('animated');
         query.classList.add('animated');

@@ -8,8 +8,7 @@ function indentedText(string) {
     var list = extractItems(lines);
     surface.appendChild(list); // Reset the surface
 
-    moveToItem(getSurfaceFirstItem());
-    refresh();
+    update(true);
 }
 
 function extractItems(lines) {
