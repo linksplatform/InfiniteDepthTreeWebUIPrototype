@@ -179,15 +179,15 @@
     }
 
     function getNextDownItem(element, thisLevel = false) {
-        const parent = element.closest('li');
-        if (!thisLevel) {
-            const rightItem = parent.querySelector('ul')?.querySelector('li .item');
-            if (rightItem) return rightItem;
+        let parent = element.closest('li');
+        const rightItem = parent.querySelector('ul')?.querySelector('li .item');
+        if (rightItem && !thisLevel) return rightItem;
+        while (parent) {
+            const nextItem = parent.nextElementSibling?.querySelector('.item');
+            if (nextItem) return nextItem;
+            if (rightItem) break;
+            parent = parent.parentElement?.closest('li');
         }
-        const nextItem = parent.nextElementSibling?.querySelector('.item');
-        if (nextItem) return nextItem;
-        const nextParentItem = parent.parentElement?.closest('li')?.nextElementSibling?.querySelector('.item');
-        if (nextParentItem) return nextParentItem;
         return null;
     }
 

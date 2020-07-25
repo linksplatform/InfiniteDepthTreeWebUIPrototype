@@ -103,22 +103,22 @@ try {
     };
 
     var getNextDownItem = function getNextDownItem(element) {
-        var _parent$nextElementSi, _parent$parentElement3, _parent$parentElement4, _parent$parentElement5;
+        var _parent$querySelector;
 
         var thisLevel = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
         var parent = element.closest('li');
+        var rightItem = (_parent$querySelector = parent.querySelector('ul')) === null || _parent$querySelector === void 0 ? void 0 : _parent$querySelector.querySelector('li .item');
+        if (rightItem && !thisLevel) return rightItem;
 
-        if (!thisLevel) {
-            var _parent$querySelector;
+        while (parent) {
+            var _parent$nextElementSi, _parent$parentElement3;
 
-            var rightItem = (_parent$querySelector = parent.querySelector('ul')) === null || _parent$querySelector === void 0 ? void 0 : _parent$querySelector.querySelector('li .item');
-            if (rightItem) return rightItem;
+            var nextItem = (_parent$nextElementSi = parent.nextElementSibling) === null || _parent$nextElementSi === void 0 ? void 0 : _parent$nextElementSi.querySelector('.item');
+            if (nextItem) return nextItem;
+            if (rightItem) break;
+            parent = (_parent$parentElement3 = parent.parentElement) === null || _parent$parentElement3 === void 0 ? void 0 : _parent$parentElement3.closest('li');
         }
 
-        var nextItem = (_parent$nextElementSi = parent.nextElementSibling) === null || _parent$nextElementSi === void 0 ? void 0 : _parent$nextElementSi.querySelector('.item');
-        if (nextItem) return nextItem;
-        var nextParentItem = (_parent$parentElement3 = parent.parentElement) === null || _parent$parentElement3 === void 0 ? void 0 : (_parent$parentElement4 = _parent$parentElement3.closest('li')) === null || _parent$parentElement4 === void 0 ? void 0 : (_parent$parentElement5 = _parent$parentElement4.nextElementSibling) === null || _parent$parentElement5 === void 0 ? void 0 : _parent$parentElement5.querySelector('.item');
-        if (nextParentItem) return nextParentItem;
         return null;
     };
 
