@@ -17,10 +17,10 @@ function extractItems(lines) {
 
     if (lines.length > 0) {
         var firstLine = lines[0];
-        var firstLineIndentLength = firstLine.search(/\S/);
+        var firstLineIndentLength = findFirstNonWhiteSpaceSymbol(firstLine);
 
         for (var i = 0; i < lines.length; i++) {
-            var itemIndentLength = lines[i].search(/\S/);
+            var itemIndentLength = findFirstNonWhiteSpaceSymbol(lines[i]);
 
             if (itemIndentLength == firstLineIndentLength) {
                 var listItem = document.createElement("li");
@@ -31,13 +31,13 @@ function extractItems(lines) {
                 var innerLines = [];
 
                 for (var j = i + 1; j < lines.length; j++) {
-                    var innerItemIndentLength = lines[j].search(/\S/);
+                    var innerItemIndentLength = findFirstNonWhiteSpaceSymbol(lines[j]);
 
                     if (innerItemIndentLength == itemIndentLength) {
                         break;
                     }
 
-                    innerLines.push(lines[j].substring(2, lines[j].length));
+                    innerLines.push(lines[j]);
                 }
 
                 if (innerLines.length > 0) {
@@ -51,4 +51,8 @@ function extractItems(lines) {
     }
 
     return list;
+}
+
+function findFirstNonWhiteSpaceSymbol(string) {
+    return string.search(/\S/);
 }
