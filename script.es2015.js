@@ -145,7 +145,7 @@ try {
                 currentItem.classList.remove('focused');
             }
 
-            setPositionOffset(item);
+            setOffset(item);
             refreshPosition(fromScroll);
             item.classList.add('focused');
             currentItem = item;
@@ -176,15 +176,15 @@ try {
         }
     };
 
-    var setPositionOffset = function setPositionOffset(obj) {
-        var position = getPosition(obj, surface);
-        offsetLeft = position.left;
-        offsetTop = position.top;
+    var setOffset = function setOffset(obj) {
+        var offset = getOffset(obj, surface);
+        offsetLeft = offset.left;
+        offsetTop = offset.top;
         offsetWidth = obj.offsetWidth;
         offsetHeight = obj.offsetHeight;
     };
 
-    var getPosition = function getPosition(obj, relativeTo) {
+    var getOffset = function getOffset(obj, relativeTo) {
         var left = 0,
             top = 0;
 
@@ -192,7 +192,8 @@ try {
             do {
                 left += obj.offsetLeft;
                 top += obj.offsetTop;
-            } while (obj === obj.offsetParent && obj !== relativeTo);
+                obj = obj.offsetParent;
+            } while (obj && obj !== relativeTo);
         }
 
         return {

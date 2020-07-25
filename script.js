@@ -212,7 +212,7 @@
             if (currentItem != null) {
                 currentItem.classList.remove('focused');
             }
-            setPositionOffset(item);
+            setOffset(item);
             refreshPosition(fromScroll);
             item.classList.add('focused');
             currentItem = item;
@@ -239,21 +239,22 @@
         }
     }
 
-    function setPositionOffset(obj) {
-        const position = getPosition(obj, surface);
-        offsetLeft = position.left;
-        offsetTop = position.top;
+    function setOffset(obj) {
+        const offset = getOffset(obj, surface);
+        offsetLeft = offset.left;
+        offsetTop = offset.top;
         offsetWidth = obj.offsetWidth;
         offsetHeight = obj.offsetHeight;
     }
 
-    function getPosition(obj, relativeTo) {
+    function getOffset(obj, relativeTo) {
         let left = 0, top = 0;
         if (obj.offsetParent) {
             do {
                 left += obj.offsetLeft;
                 top += obj.offsetTop;
-            } while (obj === obj.offsetParent && obj !== relativeTo);
+                obj = obj.offsetParent;
+            } while (obj && obj !== relativeTo);
         }
         return { 'left': left, 'top': top };
     }
