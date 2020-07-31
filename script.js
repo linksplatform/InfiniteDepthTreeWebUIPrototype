@@ -67,7 +67,7 @@
             const checkItem = function (item) {
                 const min = item.offsetTop - baseOffset;
                 const max = min + item.offsetHeight;
-                if (currentScrollTop >= min && currentScrollTop <= max) {
+                if (currentScrollTop >= min && currentScrollTop < max) {
                     return true;
                 }
                 return false;

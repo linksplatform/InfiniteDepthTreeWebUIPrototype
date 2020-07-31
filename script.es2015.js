@@ -312,7 +312,7 @@ try {
                 var min = item.offsetTop - baseOffset;
                 var max = min + item.offsetHeight;
 
-                if (currentScrollTop >= min && currentScrollTop <= max) {
+                if (currentScrollTop >= min && currentScrollTop < max) {
                     return true;
                 }
 
