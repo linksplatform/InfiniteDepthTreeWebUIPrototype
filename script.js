@@ -72,6 +72,7 @@
                 }
                 return false;
             }
+            
             const delta = currentScrollTop - lastScrollTop;
             const currentIndex = parseInt(currentItem.dataset.index);
             if (delta > 0) {

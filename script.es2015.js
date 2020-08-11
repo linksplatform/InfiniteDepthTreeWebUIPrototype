@@ -266,6 +266,7 @@ try {
         right: 39,
         down: 40,
         ctrl: 17,
+        shift: 16,
         alt: 18,
         q: 81
     };
@@ -287,18 +288,23 @@ try {
                 moveToItem(e.target);
             }
         });
+
         window.addEventListener('keydown', function (e) {
             if (tryHandleKeyDown(e)) e.preventDefault();
         });
         window.addEventListener('wheel', function (e) {
             e.preventDefault();
-
-            if (e.deltaY < 0) {
+            if(event.shiftKey && e.deltaY<0) {
+                moveToItem(getNextLeftItem(currentItem));
+                return true;
+            } else if (event.shiftKey && e.deltaY<0) {
+                moveToItem(getNextRightItem(currentItem));
+                return true;
+            } else if (e.deltaY < 0) {
                 moveToItem(getNextUpItem(currentItem));
             } else {
                 moveToItem(getNextDownItem(currentItem));
             }
-
             return false;
         }, {
             passive: false
@@ -307,7 +313,6 @@ try {
             if (ignoreScrollEvent) return;
             var baseOffset = items[0].offsetTop;
             var currentScrollTop = document.documentElement.scrollTop;
-
             var checkItem = function checkItem(item) {
                 var min = item.offsetTop - baseOffset;
                 var max = min + item.offsetHeight;
