@@ -265,7 +265,7 @@
     const firstItem = getSurfaceFirstItem(),
       lastItem = getSurfaceLastItem();
     surface.style.paddingBottom =
-      (document.body.clientHeight - firstItem.offsetHeight) / 1.75+ "px";
+      (document.body.clientHeight - firstItem.offsetHeight) + "px";
     surface.style.paddingTop =
       (document.body.clientHeight - lastItem.offsetHeight) / 2 + "px";
     query.style.left =
