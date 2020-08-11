@@ -266,7 +266,6 @@ try {
         right: 39,
         down: 40,
         ctrl: 17,
-        shift: 16,
         alt: 18,
         q: 81
     };
