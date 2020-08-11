@@ -52,10 +52,16 @@
 
         window.addEventListener('wheel', (e) => {
             e.preventDefault();
-            if (e.deltaY < 0) {
-                moveToItem(getNextUpItem(currentItem));
+            if(event.shiftKey && e.deltaY<0) {
+              moveToItem(getNextLeftItem(currentItem));
+              return true;
+            } else if (event.shiftKey && e.deltaY<0) {
+              moveToItem(getNextRightItem(currentItem));
+              return true;
+            } else if (e.deltaY < 0) {
+              moveToItem(getNextUpItem(currentItem));
             } else {
-                moveToItem(getNextDownItem(currentItem));
+              moveToItem(getNextDownItem(currentItem));
             }
             return false;
         }, { passive: false });
