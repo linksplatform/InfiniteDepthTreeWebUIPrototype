@@ -168,7 +168,7 @@ try {
     var refresh = function refresh() {
         var firstItem = getSurfaceFirstItem(),
             lastItem = getSurfaceLastItem();
-        surface.style.paddingBottom = (document.body.clientHeight - firstItem.offsetHeight) / (window.innerWidth <= 600 ? 1.7 : 2) + 'px';
+        surface.style.paddingBottom = (document.body.clientHeight - firstItem.offsetHeight) / (window.innerWidth <= 600 ? 1.65 : 2) + 'px';
         surface.style.paddingTop = (document.body.clientHeight - lastItem.offsetHeight) / 2 + 'px';
         query.style.left = (document.body.clientWidth - query.offsetWidth) / 2 + 'px';
         refreshPosition();
