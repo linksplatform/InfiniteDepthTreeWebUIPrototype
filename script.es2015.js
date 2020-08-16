@@ -282,12 +282,12 @@ try {
     document.addEventListener('DOMContentLoaded', function () {
         surface = document.getElementById('surface');
         query = document.getElementById('query');
-
         window.addEventListener('click', function (e) {
             if (e.which === mouseButton.left && e.target.classList.contains('item')) {
                 moveToItem(e.target);
             }
         });
+        
         window.addEventListener('keydown', function (e) {
             if (tryHandleKeyDown(e)) e.preventDefault();
         });
