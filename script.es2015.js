@@ -293,18 +293,15 @@ try {
         });
         window.addEventListener('wheel', function (e) {
             e.preventDefault();
-            if(event.shiftKey && e.deltaY<0) {
+            if (event.shiftKey && e.deltaY < 0) {
                 moveToItem(getNextLeftItem(currentItem));
-                return true;
-            } else if (event.shiftKey && e.deltaY>0) {
+            } else if (event.shiftKey && e.deltaY > 0) {
                 moveToItem(getNextRightItem(currentItem));
-                return true;
             } else if (e.deltaY < 0) {
                 moveToItem(getNextUpItem(currentItem));
             } else {
                 moveToItem(getNextDownItem(currentItem));
             }
-            return false;
         }, {
             passive: false
         });

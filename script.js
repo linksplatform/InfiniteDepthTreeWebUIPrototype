@@ -52,18 +52,15 @@
 
         window.addEventListener('wheel', (e) => {
             e.preventDefault();
-            if(event.shiftKey && e.deltaY<0) {
-              moveToItem(getNextLeftItem(currentItem));
-              return true;
-            } else if (event.shiftKey && e.deltaY<0) {
-              moveToItem(getNextRightItem(currentItem));
-              return true;
+            if (event.shiftKey && e.deltaY < 0) {
+                moveToItem(getNextLeftItem(currentItem));
+            } else if (event.shiftKey && e.deltaY > 0) {
+                moveToItem(getNextRightItem(currentItem));
             } else if (e.deltaY < 0) {
-              moveToItem(getNextUpItem(currentItem));
+                moveToItem(getNextUpItem(currentItem));
             } else {
-              moveToItem(getNextDownItem(currentItem));
+                moveToItem(getNextDownItem(currentItem));
             }
-            return false;
         }, { passive: false });
 
         window.addEventListener('scroll', (e) => {
