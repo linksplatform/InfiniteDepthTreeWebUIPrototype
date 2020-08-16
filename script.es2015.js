@@ -287,7 +287,6 @@ try {
                 moveToItem(e.target);
             }
         });
-        
         window.addEventListener('keydown', function (e) {
             if (tryHandleKeyDown(e)) e.preventDefault();
         });
