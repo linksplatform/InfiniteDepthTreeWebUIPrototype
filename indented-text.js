@@ -3,7 +3,7 @@ function indentedText(string) {
     // Clear the surface
     surface.innerHTML = '';
     // Build a new tree
-    var list = extractItems(lines);
+    let list = extractItems(lines);
     surface.appendChild(list);
     // Reset the surface
     update(true);

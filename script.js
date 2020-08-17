@@ -79,14 +79,14 @@
             const delta = currentScrollTop - lastScrollTop;
             const currentIndex = parseInt(currentItem.dataset.index);
             if (delta > 0) {
-                for (var i = currentIndex; i < items.length; i++) {
+                for (let i = currentIndex; i < items.length; i++) {
                     if (checkItem(items[i])) {
                         moveToItem(items[i], true);
                         break;
                     }
                 }
             } else {
-                for (var i = currentIndex; i >= 0; i--) {
+                for (let i = currentIndex; i >= 0; i--) {
                     if (checkItem(items[i])) {
                         moveToItem(items[i], true);
                         break;
