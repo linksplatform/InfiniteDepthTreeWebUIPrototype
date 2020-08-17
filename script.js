@@ -98,16 +98,12 @@
 
         window.addEventListener('mousemove', (e) => {
             if (!queryShouldBeShown) {
-                if (e.clientY < 90) {
-                    if (!querySpaceEntered) {
+                if (e.clientY < 90 && !querySpaceEntered) {
                         showQuery();
                         querySpaceEntered = true;
-                    }
-                } else {
-                    if (querySpaceEntered) {
+                } else if (querySpaceEntered){  
                         hideQuery();
                         querySpaceEntered = false;
-                    }
                 }
             }
         });
