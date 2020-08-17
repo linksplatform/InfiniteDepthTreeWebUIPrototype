@@ -97,14 +97,12 @@
         });
 
         window.addEventListener('mousemove', (e) => {
-            if (!queryShouldBeShown) {
-                if (e.clientY < 90 && !querySpaceEntered) {
-                        showQuery();
-                        querySpaceEntered = true;
-                } else if (querySpaceEntered){  
-                        hideQuery();
-                        querySpaceEntered = false;
-                }
+            if (!queryShouldBeShown && e.clientY < 90 && !querySpaceEntered) {
+                showQuery();
+                querySpaceEntered = true;
+            } else if (!queryShouldBeShown && querySpaceEntered){  
+                hideQuery();
+                querySpaceEntered = false;
             }
         });
 
