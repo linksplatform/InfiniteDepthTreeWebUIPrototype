@@ -97,10 +97,11 @@
         });
 
         window.addEventListener('mousemove', (e) => {
-            if (!queryShouldBeShown && e.clientY < 90 && !querySpaceEntered) {
+            if (queryShouldBeShown) return;
+            if (e.clientY < 90 && !querySpaceEntered) {
                 showQuery();
                 querySpaceEntered = true;
-            } else if (!queryShouldBeShown && querySpaceEntered){  
+            } else if (querySpaceEntered) {  
                 hideQuery();
                 querySpaceEntered = false;
             }
