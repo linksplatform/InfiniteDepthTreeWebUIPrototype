@@ -1,5 +1,5 @@
 ﻿try {
-    window.onerror = function (msg, url, linenumber) {
+    window.onerror = (msg, url, linenumber) => {
         alert(msg + '\nLine number: ' + linenumber);
         return true;
     };
@@ -67,7 +67,7 @@
             if (ignoreScrollEvent) return;
             const baseOffset = items[0].offsetTop;
             const currentScrollTop = document.documentElement.scrollTop;
-            const checkItem = function (item) {
+            const checkItem = item => {
                 const min = item.offsetTop - baseOffset;
                 const max = min + item.offsetHeight;
                 if (currentScrollTop >= min && currentScrollTop < max) {
@@ -279,7 +279,7 @@
             surface.style.left = newLeft;
             if (!fromScroll) {
                 ignoreScrollEvent = true;
-                scrollToY(newScrollTop, scrollAnimationDuration, function () {
+                scrollToY(newScrollTop, scrollAnimationDuration, () => {
                     ignoreScrollEvent = false;
                 });
             }
