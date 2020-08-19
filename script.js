@@ -1,7 +1,6 @@
 ﻿try {
     window.onerror = (msg, url, linenumber) => {
         alert(msg + '\nLine number: ' + linenumber);
-        return true;
     };
 
     let items = [];
