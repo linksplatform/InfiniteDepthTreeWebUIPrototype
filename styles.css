@@ -110,6 +110,65 @@ ul {
     /*text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);*/
 }
 
+/* Drag and Drop Styles */
+.item[draggable="true"] {
+    cursor: grab;
+}
+
+.item[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+    transition: all 0.2s ease;
+}
+
+.drag-over {
+    background-color: rgba(234, 117, 0, 0.1);
+    border: 2px dashed #EA7500;
+    border-radius: 5px;
+}
+
+.drag-disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.drop-indicator {
+    height: 3px;
+    background-color: #EA7500;
+    border-radius: 2px;
+    margin: 2px 0;
+    position: relative;
+    box-shadow: 0 0 6px rgba(234, 117, 0, 0.6);
+}
+
+.drop-indicator::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: -3px;
+    width: 9px;
+    height: 9px;
+    background-color: #EA7500;
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(234, 117, 0, 0.8);
+}
+
+.drop-indicator::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: -3px;
+    width: 9px;
+    height: 9px;
+    background-color: #EA7500;
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(234, 117, 0, 0.8);
+}
+
 @media only screen and (min-width: 600px) {
     .item {
         width: 600px;
