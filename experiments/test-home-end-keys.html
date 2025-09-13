@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test HOME/END Key Codes</title>
+</head>
+<body>
+    <h1>Test HOME/END Key Codes</h1>
+    <p>Press HOME or END keys to see their key codes:</p>
+    <div id="output"></div>
+    
+    <script>
+        document.addEventListener('keydown', function(e) {
+            const output = document.getElementById('output');
+            output.innerHTML += `<p>Key pressed: ${e.key}, keyCode: ${e.keyCode}</p>`;
+            
+            // Test key codes match our implementation
+            if (e.keyCode === 36) {
+                output.innerHTML += `<p style="color: green;">✓ HOME key detected (keyCode: 36)</p>`;
+            }
+            if (e.keyCode === 35) {
+                output.innerHTML += `<p style="color: green;">✓ END key detected (keyCode: 35)</p>`;
+            }
+        });
+    </script>
+</body>
+</html>

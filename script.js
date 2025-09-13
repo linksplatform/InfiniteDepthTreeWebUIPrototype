@@ -19,7 +19,9 @@
         down: 40,
         ctrl: 17,
         alt: 18,
-        q: 81
+        q: 81,
+        home: 36,
+        end: 35
     };
 
     const mouseButton = {
@@ -145,6 +147,14 @@
         }
         if (e.keyCode === keys.right) {
             moveToItem(getNextRightItem(currentItem));
+            return true;
+        }
+        if (e.keyCode === keys.home) {
+            moveToItem(getSurfaceFirstItem());
+            return true;
+        }
+        if (e.keyCode === keys.end) {
+            moveToItem(getSurfaceLastItem());
             return true;
         }
         if (ctrlOrAltIsPressed && e.which === keys.q) {
