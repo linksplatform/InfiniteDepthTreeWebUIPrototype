@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Double Tree Test</title>
+    <style>
+        body {
+            margin: 20px;
+            font-family: Arial, sans-serif;
+        }
+        
+        .test-section {
+            border: 2px solid #ccc;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .feature-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 8px;
+            margin: 4px 0;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+        
+        .feature-list li.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .controls {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .key-combo {
+            background: #6c757d;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Double Tree with Dual Selection - Test Page</h1>
+    
+    <div class="test-section">
+        <h3>🎯 Implementation Features</h3>
+        <ul class="feature-list">
+            <li class="completed">✅ Two side-by-side tree instances</li>
+            <li class="completed">✅ Independent selection for each tree</li>
+            <li class="completed">✅ Visual differentiation (orange vs blue selection)</li>
+            <li class="completed">✅ Tab key to switch between trees</li>
+            <li class="completed">✅ Shift+Arrow keys for cross-tree navigation</li>
+            <li class="completed">✅ Click to focus and select items</li>
+            <li class="completed">✅ Dual current item tracking</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h3>🕹️ Controls</h3>
+        <div class="controls">
+            <p><span class="key-combo">Tab</span> - Switch between left and right trees</p>
+            <p><span class="key-combo">↑ ↓</span> - Navigate up/down in active tree</p>
+            <p><span class="key-combo">← →</span> - Navigate left/right in tree hierarchy</p>
+            <p><span class="key-combo">Shift + ← →</span> - Switch to left/right tree and navigate</p>
+            <p><span class="key-combo">Click</span> - Focus and select item in either tree</p>
+            <p><span class="key-combo">Ctrl/Alt + Q</span> - Toggle query bar</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>🎨 Visual Indicators</h3>
+        <ul class="feature-list">
+            <li>🟠 <strong>Orange border + text</strong>: Left tree selection</li>
+            <li>🔵 <strong>Blue border + text</strong>: Right tree selection</li>
+            <li>Both selections can be active simultaneously</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h3>🔗 Use Cases</h3>
+        <ul class="feature-list">
+            <li>📎 Select two elements to link them together</li>
+            <li>🔄 Move elements from one tree location to another</li>
+            <li>🔍 Compare different parts of the tree structure</li>
+            <li>⚡ Quick navigation between related content</li>
+        </ul>
+    </div>
+
+    <p style="text-align: center; margin-top: 40px;">
+        <a href="index.html" style="background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">
+            🚀 Open Double Tree Interface
+        </a>
+    </p>
+</body>
+</html>
