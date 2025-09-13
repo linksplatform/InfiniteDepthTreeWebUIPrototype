@@ -45,6 +45,9 @@
             }
         });
 
+        // Initialize drag and drop for all items
+        initializeDragAndDrop();
+
         window.addEventListener('keydown', (e) => {
             if (tryHandleKeyDown(e)) e.preventDefault();
         });
@@ -317,6 +320,215 @@
             animationStopped = false;
             window.requestAnimationFrame(scrollStep);
         }
+    }
+
+    // Drag and Drop functionality
+    let draggedElement = null;
+    let dropIndicator = null;
+
+    function initializeDragAndDrop() {
+        // Make all items draggable
+        const allItems = document.querySelectorAll('.item');
+        allItems.forEach(item => {
+            item.draggable = true;
+            item.addEventListener('dragstart', handleDragStart);
+            item.addEventListener('dragend', handleDragEnd);
+        });
+
+        // Set up drop zones on list items
+        const allListItems = document.querySelectorAll('li');
+        allListItems.forEach(li => {
+            li.addEventListener('dragover', handleDragOver);
+            li.addEventListener('drop', handleDrop);
+            li.addEventListener('dragenter', handleDragEnter);
+            li.addEventListener('dragleave', handleDragLeave);
+        });
+
+        // Create drop indicator element
+        dropIndicator = document.createElement('div');
+        dropIndicator.className = 'drop-indicator';
+        dropIndicator.style.display = 'none';
+    }
+
+    function handleDragStart(e) {
+        draggedElement = e.target.closest('li');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', draggedElement.outerHTML);
+        
+        // Add dragging class for visual feedback
+        draggedElement.classList.add('dragging');
+        
+        // Prevent dragging parent onto child or descendant
+        const childElements = draggedElement.querySelectorAll('li');
+        childElements.forEach(child => {
+            child.classList.add('drag-disabled');
+        });
+        
+        // Also disable the dragged element itself as a drop target
+        draggedElement.classList.add('drag-disabled');
+    }
+
+    function handleDragEnd(e) {
+        // Clean up visual feedback
+        if (draggedElement) {
+            draggedElement.classList.remove('dragging');
+            const allElements = document.querySelectorAll('li');
+            allElements.forEach(el => {
+                el.classList.remove('drag-disabled', 'drag-over');
+            });
+        }
+        
+        // Hide drop indicator
+        if (dropIndicator && dropIndicator.parentNode) {
+            dropIndicator.style.display = 'none';
+        }
+        
+        draggedElement = null;
+    }
+
+    function handleDragOver(e) {
+        if (!draggedElement) return;
+        
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        
+        const targetLi = e.currentTarget;
+        
+        // Don't allow dropping on self or disabled elements
+        if (targetLi === draggedElement || targetLi.classList.contains('drag-disabled')) {
+            e.dataTransfer.dropEffect = 'none';
+            return;
+        }
+        
+        // Show drop indicator
+        showDropIndicator(targetLi, e);
+    }
+
+    function handleDragEnter(e) {
+        if (!draggedElement) return;
+        
+        const targetLi = e.currentTarget;
+        if (targetLi !== draggedElement && !targetLi.classList.contains('drag-disabled')) {
+            targetLi.classList.add('drag-over');
+        }
+    }
+
+    function handleDragLeave(e) {
+        const targetLi = e.currentTarget;
+        
+        // Only remove drag-over if we're actually leaving the element
+        if (!targetLi.contains(e.relatedTarget)) {
+            targetLi.classList.remove('drag-over');
+        }
+    }
+
+    function handleDrop(e) {
+        if (!draggedElement) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const targetLi = e.currentTarget;
+        
+        // Don't allow dropping on self or disabled elements
+        if (targetLi === draggedElement || targetLi.classList.contains('drag-disabled')) {
+            return;
+        }
+        
+        // Determine drop position
+        const dropPosition = getDropPosition(targetLi, e);
+        
+        // Perform the move
+        moveElement(draggedElement, targetLi, dropPosition);
+        
+        // Clean up
+        targetLi.classList.remove('drag-over');
+        if (dropIndicator && dropIndicator.parentNode) {
+            dropIndicator.style.display = 'none';
+        }
+        
+        // Update the items array and indices
+        update(true);
+    }
+
+    function showDropIndicator(targetLi, e) {
+        if (!dropIndicator) return;
+        
+        const rect = targetLi.getBoundingClientRect();
+        const mouseY = e.clientY;
+        const threshold = rect.height / 3;
+        
+        // Position indicator based on mouse position
+        if (mouseY < rect.top + threshold) {
+            // Drop before
+            targetLi.parentNode.insertBefore(dropIndicator, targetLi);
+        } else if (mouseY > rect.bottom - threshold) {
+            // Drop after
+            targetLi.parentNode.insertBefore(dropIndicator, targetLi.nextSibling);
+        } else {
+            // Drop as child
+            const childUl = targetLi.querySelector('ul') || createChildList(targetLi);
+            childUl.appendChild(dropIndicator);
+        }
+        
+        dropIndicator.style.display = 'block';
+    }
+
+    function getDropPosition(targetLi, e) {
+        const rect = targetLi.getBoundingClientRect();
+        const mouseY = e.clientY;
+        const threshold = rect.height / 3;
+        
+        if (mouseY < rect.top + threshold) {
+            return 'before';
+        } else if (mouseY > rect.bottom - threshold) {
+            return 'after';
+        } else {
+            return 'child';
+        }
+    }
+
+    function createChildList(parentLi) {
+        const ul = document.createElement('ul');
+        parentLi.appendChild(ul);
+        return ul;
+    }
+
+    function moveElement(draggedLi, targetLi, position) {
+        // Safety check: prevent moving element onto itself or its descendants
+        if (draggedLi === targetLi || draggedLi.contains(targetLi)) {
+            return;
+        }
+        
+        // Store reference to current parent for cleanup
+        const currentParent = draggedLi.parentNode;
+        
+        // Remove from current position
+        draggedLi.parentNode.removeChild(draggedLi);
+        
+        switch (position) {
+            case 'before':
+                targetLi.parentNode.insertBefore(draggedLi, targetLi);
+                break;
+            case 'after':
+                targetLi.parentNode.insertBefore(draggedLi, targetLi.nextSibling);
+                break;
+            case 'child':
+                const childUl = targetLi.querySelector('ul') || createChildList(targetLi);
+                childUl.appendChild(draggedLi);
+                break;
+        }
+        
+        // Clean up empty ul elements
+        if (currentParent.tagName === 'UL' && currentParent.children.length === 0) {
+            const parentLi = currentParent.closest('li');
+            if (parentLi && currentParent.parentNode === parentLi) {
+                currentParent.remove();
+            }
+        }
+        
+        // Re-initialize drag and drop for any new elements
+        initializeDragAndDrop();
     }
 
 } catch (error) {
