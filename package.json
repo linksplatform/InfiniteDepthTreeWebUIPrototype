@@ -1,0 +1,61 @@
+{
+  "name": "infinite-depth-tree-chat",
+  "version": "1.0.0",
+  "description": "Tree-based anonymous P2P chat using React and WebRTC with real-time synchronization",
+  "main": "src/index.js",
+  "homepage": "./",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/linksplatform/InfiniteDepthTreeWebUIPrototype"
+  },
+  "bugs": {
+    "url": "https://github.com/linksplatform/InfiniteDepthTreeWebUIPrototype/issues"
+  },
+  "files": [
+    "build",
+    "src",
+    "public",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "react",
+    "webrtc",
+    "p2p",
+    "chat",
+    "tree",
+    "visualization",
+    "real-time",
+    "anonymous",
+    "messaging"
+  ],
+  "author": "Links Platform",
+  "license": "Unlicense",
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
