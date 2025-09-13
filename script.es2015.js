@@ -18,6 +18,18 @@ try {
 
     var tryHandleKeyDown = function tryHandleKeyDown(e) {
         var ctrlOrAltIsPressed = e.ctrlKey || e.altKey;
+        
+        if (isEditing) {
+            if (e.keyCode === keys.enter) {
+                finishEditing();
+                return true;
+            }
+            if (e.keyCode === keys.escape) {
+                cancelEditing();
+                return true;
+            }
+            return false;
+        }
 
         if (e.keyCode === keys.up) {
             moveToItem(getNextUpItem(currentItem, !ctrlOrAltIsPressed));
@@ -36,6 +48,25 @@ try {
 
         if (e.keyCode === keys.right) {
             moveToItem(getNextRightItem(currentItem));
+            return true;
+        }
+
+        if (e.keyCode === keys.f2) {
+            startEditing(currentItem);
+            return true;
+        }
+        
+        if (e.keyCode === keys.insert) {
+            if (e.shiftKey) {
+                createChildItem();
+            } else {
+                createNewItem();
+            }
+            return true;
+        }
+        
+        if (e.keyCode === keys.del) {
+            deleteCurrentItem();
             return true;
         }
 
@@ -267,7 +298,12 @@ try {
         down: 40,
         ctrl: 17,
         alt: 18,
-        q: 81
+        q: 81,
+        enter: 13,
+        del: 46,
+        insert: 45,
+        f2: 113,
+        escape: 27
     };
     var mouseButton = {
         left: 1,
@@ -278,7 +314,9 @@ try {
     var firstTimePositionRefresh = true,
         querySpaceEntered = false,
         queryShouldBeShown = true,
-        animationStopped = true;
+        animationStopped = true,
+        isEditing = false,
+        editingElement = null;
     document.addEventListener('DOMContentLoaded', function () {
         surface = document.getElementById('surface');
         query = document.getElementById('query');
@@ -364,6 +402,193 @@ try {
         surface.classList.add('animated');
         query.classList.add('animated');
     });
+
+    var startEditing = function startEditing(item) {
+        if (!item) return;
+        
+        isEditing = true;
+        editingElement = item;
+        
+        var originalText = item.textContent.trim();
+        
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.value = originalText;
+        input.className = 'edit-input';
+        input.style.cssText = 'width: 100%; background: transparent; border: 2px solid #EA7500; color: #EA7500; font-family: inherit; font-size: inherit; padding: 5px; box-sizing: border-box; outline: none;';
+        
+        item.innerHTML = '';
+        item.appendChild(input);
+        item.classList.add('editing');
+        
+        input.focus();
+        input.select();
+    };
+
+    var finishEditing = function finishEditing() {
+        if (!isEditing || !editingElement) return;
+        
+        var input = editingElement.querySelector('.edit-input');
+        if (input) {
+            var newText = input.value.trim();
+            if (newText) {
+                editingElement.textContent = newText;
+            }
+        }
+        
+        editingElement.classList.remove('editing');
+        isEditing = false;
+        editingElement = null;
+    };
+
+    var cancelEditing = function cancelEditing() {
+        if (!isEditing || !editingElement) return;
+        
+        var input = editingElement.querySelector('.edit-input');
+        if (input && input.hasAttribute('data-original-text')) {
+            editingElement.textContent = input.getAttribute('data-original-text');
+        }
+        
+        editingElement.classList.remove('editing');
+        isEditing = false;
+        editingElement = null;
+    };
+
+    var createNewItem = function createNewItem() {
+        if (!currentItem) return;
+        
+        var currentLi = currentItem.closest('li');
+        var newLi = document.createElement('li');
+        var newItem = document.createElement('div');
+        newItem.className = 'item';
+        newItem.textContent = 'New Item';
+        newLi.appendChild(newItem);
+        
+        currentLi.parentNode.insertBefore(newLi, currentLi.nextSibling);
+        
+        update(true);
+        moveToItem(newItem);
+        startEditing(newItem);
+    };
+
+    var deleteCurrentItem = function deleteCurrentItem() {
+        if (!currentItem) return;
+        
+        var confirmDelete = confirm('Are you sure you want to delete this item and all its children?');
+        if (!confirmDelete) return;
+        
+        var currentLi = currentItem.closest('li');
+        var nextItem = getNextDownItem(currentItem, true) || getNextUpItem(currentItem, true) || getNextLeftItem(currentItem);
+        
+        currentLi.remove();
+        
+        update(true);
+        if (nextItem && nextItem.closest('li')) {
+            moveToItem(nextItem);
+        }
+    };
+
+    var createChildItem = function createChildItem() {
+        if (!currentItem) return;
+        
+        var currentLi = currentItem.closest('li');
+        var childrenUl = currentLi.querySelector('ul');
+        
+        if (!childrenUl) {
+            childrenUl = document.createElement('ul');
+            currentLi.appendChild(childrenUl);
+        }
+        
+        var newLi = document.createElement('li');
+        var newItem = document.createElement('div');
+        newItem.className = 'item';
+        newItem.textContent = 'New Child Item';
+        newLi.appendChild(newItem);
+        
+        childrenUl.appendChild(newLi);
+        
+        update(true);
+        moveToItem(newItem);
+        startEditing(newItem);
+    };
+
+    var exportTree = function exportTree() {
+        var exportData = extractTreeData(surface.querySelector('ul'));
+        var dataStr = JSON.stringify(exportData, null, 2);
+        var dataBlob = new Blob([dataStr], {type: 'application/json'});
+        
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = 'tree_data.json';
+        link.click();
+    };
+
+    var extractTreeData = function extractTreeData(ul) {
+        if (!ul) return [];
+        
+        var items = [];
+        var liElements = ul.querySelectorAll(':scope > li');
+        
+        liElements.forEach(function(li) {
+            var itemDiv = li.querySelector(':scope > .item');
+            if (itemDiv) {
+                var itemData = {
+                    text: itemDiv.textContent.trim(),
+                    children: extractTreeData(li.querySelector(':scope > ul'))
+                };
+                items.push(itemData);
+            }
+        });
+        
+        return items;
+    };
+
+    var importTree = function importTree(jsonData) {
+        try {
+            var data = JSON.parse(jsonData);
+            var newUl = buildTreeFromData(data);
+            
+            var surface = document.getElementById('surface');
+            surface.innerHTML = '';
+            surface.appendChild(newUl);
+            
+            update(true);
+        } catch (error) {
+            alert('Invalid JSON data: ' + error.message);
+        }
+    };
+
+    var buildTreeFromData = function buildTreeFromData(data) {
+        var ul = document.createElement('ul');
+        
+        data.forEach(function(item) {
+            var li = document.createElement('li');
+            var itemDiv = document.createElement('div');
+            itemDiv.className = 'item';
+            itemDiv.textContent = item.text;
+            li.appendChild(itemDiv);
+            
+            if (item.children && item.children.length > 0) {
+                var childUl = buildTreeFromData(item.children);
+                li.appendChild(childUl);
+            }
+            
+            ul.appendChild(li);
+        });
+        
+        return ul;
+    };
+
+    window.treeEditor = {
+        createItem: createNewItem,
+        createChild: createChildItem,
+        deleteItem: deleteCurrentItem,
+        editItem: function() { return startEditing(currentItem); },
+        exportTree: exportTree,
+        importTree: importTree,
+        getCurrentItem: function() { return currentItem; }
+    };
+
     var scrollCosParameter, scrollCount, scrollOldTimestamp, scrollCallback, scrollDuration, scrollElement, scrollTargetY;
 } catch (error) {
     alert(error.toString());
