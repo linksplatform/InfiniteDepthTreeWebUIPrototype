@@ -19,7 +19,12 @@
         down: 40,
         ctrl: 17,
         alt: 18,
-        q: 81
+        q: 81,
+        enter: 13,
+        del: 46,
+        insert: 45,
+        f2: 113,
+        escape: 27
     };
 
     const mouseButton = {
@@ -33,7 +38,9 @@
     let firstTimePositionRefresh = true,
         querySpaceEntered = false,
         queryShouldBeShown = true,
-        animationStopped = true;
+        animationStopped = true,
+        isEditing = false,
+        editingElement = null;
 
     document.addEventListener('DOMContentLoaded', () => {
         surface = document.getElementById('surface');
@@ -131,6 +138,19 @@
 
     function tryHandleKeyDown(e) {
         const ctrlOrAltIsPressed = e.ctrlKey || e.altKey;
+        
+        if (isEditing) {
+            if (e.keyCode === keys.enter) {
+                finishEditing();
+                return true;
+            }
+            if (e.keyCode === keys.escape) {
+                cancelEditing();
+                return true;
+            }
+            return false;
+        }
+        
         if (e.keyCode === keys.up) {
             moveToItem(getNextUpItem(currentItem, !ctrlOrAltIsPressed));
             return true;
@@ -145,6 +165,22 @@
         }
         if (e.keyCode === keys.right) {
             moveToItem(getNextRightItem(currentItem));
+            return true;
+        }
+        if (e.keyCode === keys.f2) {
+            startEditing(currentItem);
+            return true;
+        }
+        if (e.keyCode === keys.insert) {
+            if (e.shiftKey) {
+                createChildItem();
+            } else {
+                createNewItem();
+            }
+            return true;
+        }
+        if (e.keyCode === keys.del) {
+            deleteCurrentItem();
             return true;
         }
         if (ctrlOrAltIsPressed && e.which === keys.q) {
@@ -318,6 +354,202 @@
             window.requestAnimationFrame(scrollStep);
         }
     }
+
+    function startEditing(item) {
+        if (!item) return;
+        
+        isEditing = true;
+        editingElement = item;
+        
+        const originalText = item.textContent.trim();
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = originalText;
+        input.className = 'edit-input';
+        input.style.cssText = `
+            width: 100%;
+            background: transparent;
+            border: 2px solid #EA7500;
+            color: #EA7500;
+            font-family: inherit;
+            font-size: inherit;
+            padding: 5px;
+            box-sizing: border-box;
+            outline: none;
+        `;
+        
+        item.innerHTML = '';
+        item.appendChild(input);
+        item.classList.add('editing');
+        
+        input.focus();
+        input.select();
+    }
+
+    function finishEditing() {
+        if (!isEditing || !editingElement) return;
+        
+        const input = editingElement.querySelector('.edit-input');
+        if (input) {
+            const newText = input.value.trim();
+            if (newText) {
+                editingElement.textContent = newText;
+            }
+        }
+        
+        editingElement.classList.remove('editing');
+        isEditing = false;
+        editingElement = null;
+    }
+
+    function cancelEditing() {
+        if (!isEditing || !editingElement) return;
+        
+        const input = editingElement.querySelector('.edit-input');
+        if (input && input.hasAttribute('data-original-text')) {
+            editingElement.textContent = input.getAttribute('data-original-text');
+        }
+        
+        editingElement.classList.remove('editing');
+        isEditing = false;
+        editingElement = null;
+    }
+
+    function createNewItem() {
+        if (!currentItem) return;
+        
+        const currentLi = currentItem.closest('li');
+        const newLi = document.createElement('li');
+        const newItem = document.createElement('div');
+        newItem.className = 'item';
+        newItem.textContent = 'New Item';
+        newLi.appendChild(newItem);
+        
+        currentLi.parentNode.insertBefore(newLi, currentLi.nextSibling);
+        
+        update(true);
+        moveToItem(newItem);
+        startEditing(newItem);
+    }
+
+    function deleteCurrentItem() {
+        if (!currentItem) return;
+        
+        const confirmDelete = confirm('Are you sure you want to delete this item and all its children?');
+        if (!confirmDelete) return;
+        
+        const currentLi = currentItem.closest('li');
+        const nextItem = getNextDownItem(currentItem, true) || getNextUpItem(currentItem, true) || getNextLeftItem(currentItem);
+        
+        currentLi.remove();
+        
+        update(true);
+        if (nextItem && nextItem.closest('li')) {
+            moveToItem(nextItem);
+        }
+    }
+
+    function createChildItem() {
+        if (!currentItem) return;
+        
+        const currentLi = currentItem.closest('li');
+        let childrenUl = currentLi.querySelector('ul');
+        
+        if (!childrenUl) {
+            childrenUl = document.createElement('ul');
+            currentLi.appendChild(childrenUl);
+        }
+        
+        const newLi = document.createElement('li');
+        const newItem = document.createElement('div');
+        newItem.className = 'item';
+        newItem.textContent = 'New Child Item';
+        newLi.appendChild(newItem);
+        
+        childrenUl.appendChild(newLi);
+        
+        update(true);
+        moveToItem(newItem);
+        startEditing(newItem);
+    }
+
+    function exportTree() {
+        const exportData = extractTreeData(surface.querySelector('ul'));
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = 'tree_data.json';
+        link.click();
+    }
+
+    function extractTreeData(ul) {
+        if (!ul) return [];
+        
+        const items = [];
+        const liElements = ul.querySelectorAll(':scope > li');
+        
+        liElements.forEach(li => {
+            const itemDiv = li.querySelector(':scope > .item');
+            if (itemDiv) {
+                const itemData = {
+                    text: itemDiv.textContent.trim(),
+                    children: extractTreeData(li.querySelector(':scope > ul'))
+                };
+                items.push(itemData);
+            }
+        });
+        
+        return items;
+    }
+
+    function importTree(jsonData) {
+        try {
+            const data = JSON.parse(jsonData);
+            const newUl = buildTreeFromData(data);
+            
+            const surface = document.getElementById('surface');
+            surface.innerHTML = '';
+            surface.appendChild(newUl);
+            
+            update(true);
+        } catch (error) {
+            alert('Invalid JSON data: ' + error.message);
+        }
+    }
+
+    function buildTreeFromData(data) {
+        const ul = document.createElement('ul');
+        
+        data.forEach(item => {
+            const li = document.createElement('li');
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'item';
+            itemDiv.textContent = item.text;
+            li.appendChild(itemDiv);
+            
+            if (item.children && item.children.length > 0) {
+                const childUl = buildTreeFromData(item.children);
+                li.appendChild(childUl);
+            }
+            
+            ul.appendChild(li);
+        });
+        
+        return ul;
+    }
+
+    window.treeEditor = {
+        createItem: createNewItem,
+        createChild: createChildItem,
+        deleteItem: deleteCurrentItem,
+        editItem: () => startEditing(currentItem),
+        exportTree: exportTree,
+        importTree: importTree,
+        getCurrentItem: () => currentItem
+    };
 
 } catch (error) {
     alert(error.toString());

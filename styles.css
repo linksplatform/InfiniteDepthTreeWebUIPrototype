@@ -49,6 +49,24 @@ ul {
         user-select: auto;
     }
 
+    .item.editing {
+        border: 2px solid #EA7500;
+        border-radius: 3px;
+        padding: 3px;
+    }
+
+    .item .edit-input {
+        width: 100%;
+        background: transparent;
+        border: none;
+        color: inherit;
+        font-family: inherit;
+        font-size: inherit;
+        padding: 2px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
 #query {
     z-index: 10;
     position: fixed;
